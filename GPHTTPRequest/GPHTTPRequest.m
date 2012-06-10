@@ -28,6 +28,8 @@
 @synthesize timeout = timeout;
 @synthesize stringEncoding = stringEncoding;
 @synthesize postValues = postValues;
+@synthesize postFiles = postFiles;
+@synthesize cacheModel = cacheModel;
 
 static NSString* DefaultUserAgent = @"";
 static NSInteger DefaultTimeout = 10; 
@@ -114,7 +116,27 @@ static NSInteger DefaultTimeout = 10;
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//caching functions
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//returns if request was loaded from cache
+-(BOOL)didLoadFromCache
+{
+    return didUseCache;
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//set the request cache Time to live.
+-(void)setCacheTimeout:(NSInteger)seconds
+{
+    self.cacheModel = GPHTTPCacheCustomTime;
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //post and put method
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+-(NSData*)stringAsData:(NSString*)string
+{
+    return [string dataUsingEncoding:self.stringEncoding];
+}
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 -(void)setupPost:(NSMutableURLRequest*)request
 {
@@ -133,6 +155,72 @@ static NSInteger DefaultTimeout = 10;
     [postValues setObject:value forKey:key];
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+-(void)setupPut:(NSMutableURLRequest*)request
+{
+	NSString *charset = (NSString *)CFStringConvertEncodingToIANACharSetName(CFStringConvertNSStringEncodingToEncoding(self.stringEncoding));
+	CFUUIDRef uuid = CFUUIDCreate(nil);
+	NSString *uuidString = [(NSString*)CFUUIDCreateString(nil, uuid) autorelease];
+	CFRelease(uuid);
+	NSString *stringBoundary = [NSString stringWithFormat:@"0xKhTmLbOuNdArY-%@",uuidString];
+    [self addRequestHeader:[NSString stringWithFormat:@"multipart/form-data; charset=%@; boundary=%@", charset, stringBoundary] key:@"Content-Type"];
+    
+    NSString *endItemBoundary = [NSString stringWithFormat:@"\r\n--%@\r\n",stringBoundary];
+    NSString* postString = [self putString:stringBoundary];
+    NSMutableData* putData = [NSMutableData data];
+    
+    [putData appendData:[postString dataUsingEncoding:self.stringEncoding]];
+	NSInteger i = 0;
+	for (NSDictionary* item in postFiles) 
+    {
+		[putData appendData:[self stringAsData:[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"%@\"; filename=\"%@\"\r\n", [item objectForKey:@"key"], [item objectForKey:@"name"]]]];
+		[putData appendData:[self stringAsData:[NSString stringWithFormat:@"Content-Type: %@\r\n\r\n", [item objectForKey:@"type"]]]];
+        [putData appendData:[item objectForKey:@"data"]];
+		i++;
+		if (i != postFiles.count)// Only add the boundary if this is not the last item in the post body
+			[putData appendData:[self stringAsData:endItemBoundary]];
+	}
+	
+	[putData appendData:[self stringAsData:[NSString stringWithFormat:@"\r\n--%@--\r\n",stringBoundary]]];
+    [request setHTTPBody:putData];
+}
+                 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//add file data to post/put form.
+-(void)addPostData:(NSData*)data mimeType:(NSString*)mimeType fileName:(NSString*)name forKey:(NSString*)key
+{
+    requestType = GPHTTPRequestPUT;
+    if(!postFiles)
+        postFiles = [[NSMutableArray alloc] init];
+    NSMutableDictionary* dic = [NSMutableDictionary dictionary];
+    [dic setObject:name forKey:@"name"];
+    [dic setObject:data forKey:@"data"];
+    [dic setObject:mimeType forKey:@"type"];
+    [dic setObject:key forKey:@"key"];
+    [postFiles addObject:dic];
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+-(void)addPostFile:(NSURL*)path forKey:(NSString*)key
+{
+    [self addPostFile:path fileName:nil forKey:key];
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//add a file from a url path to post/put form.
+-(void)addPostFile:(NSURL*)path fileName:(NSString*)name forKey:(NSString*)key
+{
+    NSURLRequest* fileUrlRequest = [[NSURLRequest alloc] initWithURL:path];
+    
+    NSError* error = nil;
+    NSURLResponse* response = nil;
+    NSData* fileData = [NSURLConnection sendSynchronousRequest:fileUrlRequest returningResponse:&response error:&error];
+    NSString* mimeType = [response MIMEType];
+    [fileUrlRequest release];
+    NSString* fileName = name;
+    if(!fileName)
+        fileName = [response suggestedFilename];
+    
+    [self addPostData:fileData mimeType:mimeType fileName:fileName forKey:key];
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //convert the post parameters into the need post string
 -(NSString*)postString
 {
@@ -145,7 +233,7 @@ static NSInteger DefaultTimeout = 10;
             for(NSString* nestedString in value)
                 [comps addObject:[NSString stringWithFormat:@"%@[]=%@",key,[self encodeString:nestedString]]];
         }
-        else if([value isKindOfClass:[NSArray class]])
+        else if([value isKindOfClass:[NSDictionary class]])
         {
             for(NSString* nestedKey in value)
                 [comps addObject:[NSString stringWithFormat:@"%@[%@]=%@",key,nestedKey,[self encodeString:[value objectForKey:nestedKey]]]];
@@ -154,6 +242,36 @@ static NSInteger DefaultTimeout = 10;
             [comps addObject:[NSString stringWithFormat:@"%@=%@",key,[self encodeString:[postValues objectForKey:key]]]];
     }
     return [comps componentsJoinedByString:@"&"];
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//convert the post parameters into the need PUT string
+-(NSString*)putString:(NSString*)stringBoundary
+{
+    NSString* postString = [NSString stringWithFormat:@"--%@\r\n",stringBoundary];
+    
+    NSUInteger i=0;
+    NSString *endItemBoundary = [NSString stringWithFormat:@"\r\n--%@\r\n",stringBoundary];
+    for(NSString* key in postValues)
+    {
+        id value = [postValues objectForKey:key];
+        if([value isKindOfClass:[NSArray class]])
+        {
+            for(NSString* nestedString in value)
+                postString = [postString stringByAppendingFormat:@"Content-Disposition: form-data; name=\"%@[]\"\r\n\r\n%@",key,[self encodeString:nestedString]];
+        }
+        else if([value isKindOfClass:[NSDictionary class]])
+        {
+            for(NSString* nestedKey in value)
+                postString = [postString stringByAppendingFormat:@"Content-Disposition: form-data; name=\"%@[%@]\"\r\n\r\n%@",key,nestedKey,[self encodeString:[value objectForKey:nestedKey]]];
+        }
+        else
+            postString = [postString stringByAppendingFormat:@"Content-Disposition: form-data; name=\"%@\"\r\n\r\n%@",key,[self encodeString:value]];
+        
+        i++;
+		if (i != postValues.count || postFiles.count > 0) //Only add the boundary if this is not the last item in the post body
+			postString = [postString stringByAppendingFormat:@"%@",endItemBoundary];
+    }
+    return postString;
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 -(NSString*)encodeString:(NSString*)string
@@ -188,6 +306,7 @@ static NSInteger DefaultTimeout = 10;
     [receivedData release];
     [requestHeaders release];
     [postValues release];
+    [postFiles release];
     [super dealloc];
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////

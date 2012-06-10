@@ -16,6 +16,14 @@ typedef enum{
     GPHTTPRequestPUT,
 }GPHTTPRequestType;
 
+typedef enum{
+    GPHTTPCacheIfModifed, //ask server for did modify
+    GPHTTPCacheCustomTime, //use custom timeout, this will be set, if you add a custom timeout
+    GPHTTPUseCacheAndUpdate, //load from cache then update request
+    GPHTTPJustUseCache, //don't send request and just use cache
+    GPHTTPIgnoreCache //ignore cache completely
+}GPHTTPRequestCache;
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //delegate
 @class GPHTTPRequest;
@@ -42,6 +50,9 @@ typedef enum{
     NSStringEncoding stringEncoding;
     BOOL isFinished;
     NSMutableDictionary* postValues;
+    NSMutableArray* postFiles;
+    GPHTTPRequestCache cacheModel;
+    BOOL didUseCache;
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //properties
@@ -53,18 +64,26 @@ typedef enum{
 @property(nonatomic,assign)NSInteger timeout;
 @property(nonatomic,assign)NSStringEncoding stringEncoding;
 @property(nonatomic,retain,readonly)NSDictionary* postValues;
+@property(nonatomic,retain,readonly)NSArray* postFiles;
+@property(nonatomic,assign)GPHTTPRequestCache cacheModel;
 
 -(void)startSync;
 -(void)startAsync;
 -(void)addRequestHeader:(NSString*)value key:(NSString*)key;
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //POST/PUT methods
 -(void)addPostValue:(id)value key:(NSString*)key;
+-(void)addPostData:(NSData*)data mimeType:(NSString*)mimeType fileName:(NSString*)name forKey:(NSString*)key;
+-(void)addPostFile:(NSURL*)path forKey:(NSString*)key;
+-(void)addPostFile:(NSURL*)path fileName:(NSString*)name forKey:(NSString*)key;
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //request finished
 -(NSString*)responseString;
 -(NSData*)responseData;
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//caching functions
+-(BOOL)didLoadFromCache;
+-(void)setCacheTimeout:(NSInteger)seconds;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //public factory methods
