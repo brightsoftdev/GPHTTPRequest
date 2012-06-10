@@ -1,0 +1,718 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		5CE2C0761583F95B00463E97 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5CE2C0121582E5A800463E97 /* Cocoa.framework */; };
+		5CE2C07C1583F95B00463E97 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 5CE2C07A1583F95B00463E97 /* InfoPlist.strings */; };
+		5CE2C0871583F95B00463E97 /* SenTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5CE2C0241582E5A800463E97 /* SenTestingKit.framework */; };
+		5CE2C0881583F95B00463E97 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5CE2C0121582E5A800463E97 /* Cocoa.framework */; };
+		5CE2C08B1583F95B00463E97 /* GPHTTPRequestFramework.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5CE2C0751583F95B00463E97 /* GPHTTPRequestFramework.framework */; };
+		5CE2C0911583F95B00463E97 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 5CE2C08F1583F95B00463E97 /* InfoPlist.strings */; };
+		5CE2C0941583F95B00463E97 /* GPHTTPRequestFrameworkTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 5CE2C0931583F95B00463E97 /* GPHTTPRequestFrameworkTests.m */; };
+		5CE2C0A21583FB0F00463E97 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5CE2C0A11583FB0F00463E97 /* Foundation.framework */; };
+		5CE2C0AF1583FB0F00463E97 /* SenTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5CE2C0241582E5A800463E97 /* SenTestingKit.framework */; };
+		5CE2C0B11583FB0F00463E97 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5CE2C0B01583FB0F00463E97 /* UIKit.framework */; };
+		5CE2C0B21583FB0F00463E97 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5CE2C0A11583FB0F00463E97 /* Foundation.framework */; };
+		5CE2C0B51583FB0F00463E97 /* libGPHTTPRequestLibrary.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5CE2C0A01583FB0F00463E97 /* libGPHTTPRequestLibrary.a */; };
+		5CE2C0BB1583FB0F00463E97 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 5CE2C0B91583FB0F00463E97 /* InfoPlist.strings */; };
+		5CE2C0BE1583FB0F00463E97 /* GPHTTPRequestLibraryTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 5CE2C0BD1583FB0F00463E97 /* GPHTTPRequestLibraryTests.m */; };
+		5CE2C0E61583FC5800463E97 /* GPHTTPRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 5CE2C01C1582E5A800463E97 /* GPHTTPRequest.m */; };
+		5CE2C0E81583FC5D00463E97 /* GPHTTPRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 5CE2C01C1582E5A800463E97 /* GPHTTPRequest.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		5CE2C0891583F95B00463E97 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5CE2C0061582E5A800463E97 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5CE2C0741583F95B00463E97;
+			remoteInfo = GPHTTPRequestFramework;
+		};
+		5CE2C0B31583FB0F00463E97 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5CE2C0061582E5A800463E97 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5CE2C09F1583FB0F00463E97;
+			remoteInfo = GPHTTPRequestLibrary;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		5CE2C0121582E5A800463E97 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
+		5CE2C0151582E5A800463E97 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
+		5CE2C0161582E5A800463E97 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		5CE2C0171582E5A800463E97 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		5CE2C01B1582E5A800463E97 /* GPHTTPRequest.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GPHTTPRequest.h; sourceTree = "<group>"; };
+		5CE2C01C1582E5A800463E97 /* GPHTTPRequest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GPHTTPRequest.m; sourceTree = "<group>"; };
+		5CE2C0241582E5A800463E97 /* SenTestingKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SenTestingKit.framework; path = Library/Frameworks/SenTestingKit.framework; sourceTree = DEVELOPER_DIR; };
+		5CE2C0751583F95B00463E97 /* GPHTTPRequestFramework.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = GPHTTPRequestFramework.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		5CE2C0791583F95B00463E97 /* GPHTTPRequestFramework-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GPHTTPRequestFramework-Info.plist"; sourceTree = "<group>"; };
+		5CE2C07B1583F95B00463E97 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		5CE2C07D1583F95B00463E97 /* GPHTTPRequestFramework-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "GPHTTPRequestFramework-Prefix.pch"; sourceTree = "<group>"; };
+		5CE2C0861583F95B00463E97 /* GPHTTPRequestFrameworkTests.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GPHTTPRequestFrameworkTests.octest; sourceTree = BUILT_PRODUCTS_DIR; };
+		5CE2C08E1583F95B00463E97 /* GPHTTPRequestFrameworkTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GPHTTPRequestFrameworkTests-Info.plist"; sourceTree = "<group>"; };
+		5CE2C0901583F95B00463E97 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		5CE2C0921583F95B00463E97 /* GPHTTPRequestFrameworkTests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GPHTTPRequestFrameworkTests.h; sourceTree = "<group>"; };
+		5CE2C0931583F95B00463E97 /* GPHTTPRequestFrameworkTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GPHTTPRequestFrameworkTests.m; sourceTree = "<group>"; };
+		5CE2C0A01583FB0F00463E97 /* libGPHTTPRequestLibrary.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libGPHTTPRequestLibrary.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		5CE2C0A11583FB0F00463E97 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		5CE2C0A51583FB0F00463E97 /* GPHTTPRequestLibrary-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "GPHTTPRequestLibrary-Prefix.pch"; sourceTree = "<group>"; };
+		5CE2C0AE1583FB0F00463E97 /* GPHTTPRequestLibraryTests.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GPHTTPRequestLibraryTests.octest; sourceTree = BUILT_PRODUCTS_DIR; };
+		5CE2C0B01583FB0F00463E97 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = Library/Frameworks/UIKit.framework; sourceTree = DEVELOPER_DIR; };
+		5CE2C0B81583FB0F00463E97 /* GPHTTPRequestLibraryTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GPHTTPRequestLibraryTests-Info.plist"; sourceTree = "<group>"; };
+		5CE2C0BA1583FB0F00463E97 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		5CE2C0BC1583FB0F00463E97 /* GPHTTPRequestLibraryTests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GPHTTPRequestLibraryTests.h; sourceTree = "<group>"; };
+		5CE2C0BD1583FB0F00463E97 /* GPHTTPRequestLibraryTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GPHTTPRequestLibraryTests.m; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		5CE2C0711583F95B00463E97 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5CE2C0761583F95B00463E97 /* Cocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5CE2C0821583F95B00463E97 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5CE2C0871583F95B00463E97 /* SenTestingKit.framework in Frameworks */,
+				5CE2C0881583F95B00463E97 /* Cocoa.framework in Frameworks */,
+				5CE2C08B1583F95B00463E97 /* GPHTTPRequestFramework.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5CE2C09D1583FB0F00463E97 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5CE2C0A21583FB0F00463E97 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5CE2C0AA1583FB0F00463E97 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5CE2C0AF1583FB0F00463E97 /* SenTestingKit.framework in Frameworks */,
+				5CE2C0B11583FB0F00463E97 /* UIKit.framework in Frameworks */,
+				5CE2C0B21583FB0F00463E97 /* Foundation.framework in Frameworks */,
+				5CE2C0B51583FB0F00463E97 /* libGPHTTPRequestLibrary.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		5CE2C0041582E5A800463E97 = {
+			isa = PBXGroup;
+			children = (
+				5CE2C0181582E5A800463E97 /* GPHTTPRequest */,
+				5CE2C0111582E5A800463E97 /* Frameworks */,
+				5CE2C0101582E5A800463E97 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		5CE2C0101582E5A800463E97 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				5CE2C0751583F95B00463E97 /* GPHTTPRequestFramework.framework */,
+				5CE2C0861583F95B00463E97 /* GPHTTPRequestFrameworkTests.octest */,
+				5CE2C0A01583FB0F00463E97 /* libGPHTTPRequestLibrary.a */,
+				5CE2C0AE1583FB0F00463E97 /* GPHTTPRequestLibraryTests.octest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		5CE2C0111582E5A800463E97 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				5CE2C0121582E5A800463E97 /* Cocoa.framework */,
+				5CE2C0241582E5A800463E97 /* SenTestingKit.framework */,
+				5CE2C0A11583FB0F00463E97 /* Foundation.framework */,
+				5CE2C0B01583FB0F00463E97 /* UIKit.framework */,
+				5CE2C0141582E5A800463E97 /* Other Frameworks */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		5CE2C0141582E5A800463E97 /* Other Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				5CE2C0151582E5A800463E97 /* AppKit.framework */,
+				5CE2C0161582E5A800463E97 /* CoreData.framework */,
+				5CE2C0171582E5A800463E97 /* Foundation.framework */,
+			);
+			name = "Other Frameworks";
+			sourceTree = "<group>";
+		};
+		5CE2C0181582E5A800463E97 /* GPHTTPRequest */ = {
+			isa = PBXGroup;
+			children = (
+				5CE2C01B1582E5A800463E97 /* GPHTTPRequest.h */,
+				5CE2C01C1582E5A800463E97 /* GPHTTPRequest.m */,
+				5CE2C0E91583FC7E00463E97 /* tests */,
+			);
+			path = GPHTTPRequest;
+			sourceTree = "<group>";
+		};
+		5CE2C0771583F95B00463E97 /* GPHTTPRequestFramework */ = {
+			isa = PBXGroup;
+			children = (
+				5CE2C0781583F95B00463E97 /* Supporting Files */,
+			);
+			path = GPHTTPRequestFramework;
+			sourceTree = SOURCE_ROOT;
+		};
+		5CE2C0781583F95B00463E97 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				5CE2C0791583F95B00463E97 /* GPHTTPRequestFramework-Info.plist */,
+				5CE2C07A1583F95B00463E97 /* InfoPlist.strings */,
+				5CE2C07D1583F95B00463E97 /* GPHTTPRequestFramework-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		5CE2C08C1583F95B00463E97 /* GPHTTPRequestFrameworkTests */ = {
+			isa = PBXGroup;
+			children = (
+				5CE2C0921583F95B00463E97 /* GPHTTPRequestFrameworkTests.h */,
+				5CE2C0931583F95B00463E97 /* GPHTTPRequestFrameworkTests.m */,
+				5CE2C08D1583F95B00463E97 /* Supporting Files */,
+			);
+			path = GPHTTPRequestFrameworkTests;
+			sourceTree = SOURCE_ROOT;
+		};
+		5CE2C08D1583F95B00463E97 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				5CE2C08E1583F95B00463E97 /* GPHTTPRequestFrameworkTests-Info.plist */,
+				5CE2C08F1583F95B00463E97 /* InfoPlist.strings */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		5CE2C0A31583FB0F00463E97 /* GPHTTPRequestLibrary */ = {
+			isa = PBXGroup;
+			children = (
+				5CE2C0A41583FB0F00463E97 /* Supporting Files */,
+			);
+			path = GPHTTPRequestLibrary;
+			sourceTree = SOURCE_ROOT;
+		};
+		5CE2C0A41583FB0F00463E97 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				5CE2C0A51583FB0F00463E97 /* GPHTTPRequestLibrary-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		5CE2C0B61583FB0F00463E97 /* GPHTTPRequestLibraryTests */ = {
+			isa = PBXGroup;
+			children = (
+				5CE2C0BC1583FB0F00463E97 /* GPHTTPRequestLibraryTests.h */,
+				5CE2C0BD1583FB0F00463E97 /* GPHTTPRequestLibraryTests.m */,
+				5CE2C0B71583FB0F00463E97 /* Supporting Files */,
+			);
+			path = GPHTTPRequestLibraryTests;
+			sourceTree = SOURCE_ROOT;
+		};
+		5CE2C0B71583FB0F00463E97 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				5CE2C0B81583FB0F00463E97 /* GPHTTPRequestLibraryTests-Info.plist */,
+				5CE2C0B91583FB0F00463E97 /* InfoPlist.strings */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		5CE2C0E91583FC7E00463E97 /* tests */ = {
+			isa = PBXGroup;
+			children = (
+				5CE2C0771583F95B00463E97 /* GPHTTPRequestFramework */,
+				5CE2C08C1583F95B00463E97 /* GPHTTPRequestFrameworkTests */,
+				5CE2C0A31583FB0F00463E97 /* GPHTTPRequestLibrary */,
+				5CE2C0B61583FB0F00463E97 /* GPHTTPRequestLibraryTests */,
+			);
+			name = tests;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		5CE2C0721583F95B00463E97 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5CE2C09E1583FB0F00463E97 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		5CE2C0741583F95B00463E97 /* GPHTTPRequestFramework */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5CE2C0991583F95B00463E97 /* Build configuration list for PBXNativeTarget "GPHTTPRequestFramework" */;
+			buildPhases = (
+				5CE2C0701583F95B00463E97 /* Sources */,
+				5CE2C0711583F95B00463E97 /* Frameworks */,
+				5CE2C0721583F95B00463E97 /* Headers */,
+				5CE2C0731583F95B00463E97 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = GPHTTPRequestFramework;
+			productName = GPHTTPRequestFramework;
+			productReference = 5CE2C0751583F95B00463E97 /* GPHTTPRequestFramework.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		5CE2C0851583F95B00463E97 /* GPHTTPRequestFrameworkTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5CE2C09A1583F95B00463E97 /* Build configuration list for PBXNativeTarget "GPHTTPRequestFrameworkTests" */;
+			buildPhases = (
+				5CE2C0811583F95B00463E97 /* Sources */,
+				5CE2C0821583F95B00463E97 /* Frameworks */,
+				5CE2C0831583F95B00463E97 /* Resources */,
+				5CE2C0841583F95B00463E97 /* ShellScript */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				5CE2C08A1583F95B00463E97 /* PBXTargetDependency */,
+			);
+			name = GPHTTPRequestFrameworkTests;
+			productName = GPHTTPRequestFrameworkTests;
+			productReference = 5CE2C0861583F95B00463E97 /* GPHTTPRequestFrameworkTests.octest */;
+			productType = "com.apple.product-type.bundle";
+		};
+		5CE2C09F1583FB0F00463E97 /* GPHTTPRequestLibrary */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5CE2C0BF1583FB0F00463E97 /* Build configuration list for PBXNativeTarget "GPHTTPRequestLibrary" */;
+			buildPhases = (
+				5CE2C09C1583FB0F00463E97 /* Sources */,
+				5CE2C09D1583FB0F00463E97 /* Frameworks */,
+				5CE2C09E1583FB0F00463E97 /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = GPHTTPRequestLibrary;
+			productName = GPHTTPRequestLibrary;
+			productReference = 5CE2C0A01583FB0F00463E97 /* libGPHTTPRequestLibrary.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+		5CE2C0AD1583FB0F00463E97 /* GPHTTPRequestLibraryTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5CE2C0C21583FB0F00463E97 /* Build configuration list for PBXNativeTarget "GPHTTPRequestLibraryTests" */;
+			buildPhases = (
+				5CE2C0A91583FB0F00463E97 /* Sources */,
+				5CE2C0AA1583FB0F00463E97 /* Frameworks */,
+				5CE2C0AB1583FB0F00463E97 /* Resources */,
+				5CE2C0AC1583FB0F00463E97 /* ShellScript */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				5CE2C0B41583FB0F00463E97 /* PBXTargetDependency */,
+			);
+			name = GPHTTPRequestLibraryTests;
+			productName = GPHTTPRequestLibraryTests;
+			productReference = 5CE2C0AE1583FB0F00463E97 /* GPHTTPRequestLibraryTests.octest */;
+			productType = "com.apple.product-type.bundle";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		5CE2C0061582E5A800463E97 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0430;
+			};
+			buildConfigurationList = 5CE2C0091582E5A800463E97 /* Build configuration list for PBXProject "GPHTTPRequest" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 5CE2C0041582E5A800463E97;
+			productRefGroup = 5CE2C0101582E5A800463E97 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				5CE2C0741583F95B00463E97 /* GPHTTPRequestFramework */,
+				5CE2C0851583F95B00463E97 /* GPHTTPRequestFrameworkTests */,
+				5CE2C09F1583FB0F00463E97 /* GPHTTPRequestLibrary */,
+				5CE2C0AD1583FB0F00463E97 /* GPHTTPRequestLibraryTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		5CE2C0731583F95B00463E97 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5CE2C07C1583F95B00463E97 /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5CE2C0831583F95B00463E97 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5CE2C0911583F95B00463E97 /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5CE2C0AB1583FB0F00463E97 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5CE2C0BB1583FB0F00463E97 /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		5CE2C0841583F95B00463E97 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Run the unit tests in this test bundle.\n\"${SYSTEM_DEVELOPER_DIR}/Tools/RunUnitTests\"\n";
+		};
+		5CE2C0AC1583FB0F00463E97 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Run the unit tests in this test bundle.\n\"${SYSTEM_DEVELOPER_DIR}/Tools/RunUnitTests\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		5CE2C0701583F95B00463E97 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5CE2C0E81583FC5D00463E97 /* GPHTTPRequest.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5CE2C0811583F95B00463E97 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5CE2C0941583F95B00463E97 /* GPHTTPRequestFrameworkTests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5CE2C09C1583FB0F00463E97 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5CE2C0E61583FC5800463E97 /* GPHTTPRequest.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5CE2C0A91583FB0F00463E97 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5CE2C0BE1583FB0F00463E97 /* GPHTTPRequestLibraryTests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		5CE2C08A1583F95B00463E97 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 5CE2C0741583F95B00463E97 /* GPHTTPRequestFramework */;
+			targetProxy = 5CE2C0891583F95B00463E97 /* PBXContainerItemProxy */;
+		};
+		5CE2C0B41583FB0F00463E97 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 5CE2C09F1583FB0F00463E97 /* GPHTTPRequestLibrary */;
+			targetProxy = 5CE2C0B31583FB0F00463E97 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		5CE2C07A1583F95B00463E97 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				5CE2C07B1583F95B00463E97 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		5CE2C08F1583F95B00463E97 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				5CE2C0901583F95B00463E97 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		5CE2C0B91583FB0F00463E97 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				5CE2C0BA1583FB0F00463E97 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		5CE2C0331582E5A900463E97 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		5CE2C0341582E5A900463E97 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		5CE2C0951583F95B00463E97 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_VERSION = A;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "GPHTTPRequestFramework/GPHTTPRequestFramework-Prefix.pch";
+				INFOPLIST_FILE = "GPHTTPRequestFramework/GPHTTPRequestFramework-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = framework;
+			};
+			name = Debug;
+		};
+		5CE2C0961583F95B00463E97 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_VERSION = A;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "GPHTTPRequestFramework/GPHTTPRequestFramework-Prefix.pch";
+				INFOPLIST_FILE = "GPHTTPRequestFramework/GPHTTPRequestFramework-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = framework;
+			};
+			name = Release;
+		};
+		5CE2C0971583F95B00463E97 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = "$(DEVELOPER_LIBRARY_DIR)/Frameworks";
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "GPHTTPRequestFramework/GPHTTPRequestFramework-Prefix.pch";
+				INFOPLIST_FILE = "GPHTTPRequestFrameworkTests/GPHTTPRequestFrameworkTests-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = octest;
+			};
+			name = Debug;
+		};
+		5CE2C0981583F95B00463E97 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = "$(DEVELOPER_LIBRARY_DIR)/Frameworks";
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "GPHTTPRequestFramework/GPHTTPRequestFramework-Prefix.pch";
+				INFOPLIST_FILE = "GPHTTPRequestFrameworkTests/GPHTTPRequestFrameworkTests-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = octest;
+			};
+			name = Release;
+		};
+		5CE2C0C01583FB0F00463E97 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				DSTROOT = /tmp/GPHTTPRequestLibrary.dst;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "GPHTTPRequestLibrary/GPHTTPRequestLibrary-Prefix.pch";
+				IPHONEOS_DEPLOYMENT_TARGET = 5.1;
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
+		5CE2C0C11583FB0F00463E97 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				DSTROOT = /tmp/GPHTTPRequestLibrary.dst;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "GPHTTPRequestLibrary/GPHTTPRequestLibrary-Prefix.pch";
+				IPHONEOS_DEPLOYMENT_TARGET = 5.1;
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		5CE2C0C31583FB0F00463E97 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(DEVELOPER_LIBRARY_DIR)/Frameworks",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "GPHTTPRequestLibrary/GPHTTPRequestLibrary-Prefix.pch";
+				INFOPLIST_FILE = "GPHTTPRequestLibraryTests/GPHTTPRequestLibraryTests-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 5.1;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				WRAPPER_EXTENSION = octest;
+			};
+			name = Debug;
+		};
+		5CE2C0C41583FB0F00463E97 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(DEVELOPER_LIBRARY_DIR)/Frameworks",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "GPHTTPRequestLibrary/GPHTTPRequestLibrary-Prefix.pch";
+				INFOPLIST_FILE = "GPHTTPRequestLibraryTests/GPHTTPRequestLibraryTests-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 5.1;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+				WRAPPER_EXTENSION = octest;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		5CE2C0091582E5A800463E97 /* Build configuration list for PBXProject "GPHTTPRequest" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5CE2C0331582E5A900463E97 /* Debug */,
+				5CE2C0341582E5A900463E97 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		5CE2C0991583F95B00463E97 /* Build configuration list for PBXNativeTarget "GPHTTPRequestFramework" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5CE2C0951583F95B00463E97 /* Debug */,
+				5CE2C0961583F95B00463E97 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		5CE2C09A1583F95B00463E97 /* Build configuration list for PBXNativeTarget "GPHTTPRequestFrameworkTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5CE2C0971583F95B00463E97 /* Debug */,
+				5CE2C0981583F95B00463E97 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		5CE2C0BF1583FB0F00463E97 /* Build configuration list for PBXNativeTarget "GPHTTPRequestLibrary" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5CE2C0C01583FB0F00463E97 /* Debug */,
+				5CE2C0C11583FB0F00463E97 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		5CE2C0C21583FB0F00463E97 /* Build configuration list for PBXNativeTarget "GPHTTPRequestLibraryTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5CE2C0C31583FB0F00463E97 /* Debug */,
+				5CE2C0C41583FB0F00463E97 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 5CE2C0061582E5A800463E97 /* Project object */;
+}

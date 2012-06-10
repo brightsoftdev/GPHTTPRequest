@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>SchemeUserState</key>
+	<dict>
+		<key>GPHTTPRequest.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>0</integer>
+		</dict>
+		<key>GPHTTPRequestFramework.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>4</integer>
+		</dict>
+		<key>GPHTTPRequestLibrary.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>5</integer>
+		</dict>
+	</dict>
+	<key>SuppressBuildableAutocreation</key>
+	<dict>
+		<key>5CE2C00E1582E5A800463E97</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>5CE2C0221582E5A800463E97</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>5CE2C0741583F95B00463E97</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>5CE2C0851583F95B00463E97</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>5CE2C09F1583FB0F00463E97</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>5CE2C0AD1583FB0F00463E97</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+	</dict>
+</dict>
+</plist>
