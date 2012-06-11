@@ -7,12 +7,15 @@
 //
 
 #import "GPHTTPRequest.h"
+#import <CommonCrypto/CommonHMAC.h>
 
 @interface  GPHTTPRequest()
 
 -(NSMutableURLRequest*)setupRequest;
 -(void)setupPost:(NSMutableURLRequest*)request;
+-(void)setupPut:(NSMutableURLRequest*)request;
 -(NSString*)postString;
+-(NSString*)putString:(NSString*)stringBoundary;
 -(NSString*)encodeString:(NSString*)string;
 
 @end
@@ -35,13 +38,38 @@ static NSString* DefaultUserAgent = @"";
 static NSInteger DefaultTimeout = 10; 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+-(id)initWithURL:(NSURL*)url
+{
+    if(self = [super init])
+    {
+        self.requestType = GPHTTPRequestGET;
+        self.URL = URL;
+        self.allowCompression = YES;
+        self.timeout = DefaultTimeout;
+        self.stringEncoding = NSUTF8StringEncoding;
+        self.cacheModel = GPHTTPCacheIfModifed;
+    }
+    return self;
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+-(id)initWithString:(NSString*)string
+{
+    return [[GPHTTPRequest alloc] initWithURL:[NSURL URLWithString:string]];
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 -(NSMutableURLRequest*)setupRequest
 {
     isFinished = NO;
     if(!receivedData)
         receivedData = [[NSMutableData data] retain];
+    
+    if([self checkCache])
+    {
+        isFinished = YES;
+        return nil;
+    }
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:self.URL
-                                                           cachePolicy:NSURLRequestUseProtocolCachePolicy
+                                                           cachePolicy:NSURLRequestReloadIgnoringLocalCacheData
                                                        timeoutInterval:self.timeout];
     
 
@@ -61,7 +89,10 @@ static NSInteger DefaultTimeout = 10;
         [self setupPost:request];
     }
     else if(requestType == GPHTTPRequestPUT)
+    {
         [request setHTTPMethod:@"PUT"];
+        [self setupPut:request];
+    }
     
     [requestHeaders removeAllObjects];
     return request;
@@ -70,8 +101,11 @@ static NSInteger DefaultTimeout = 10;
 -(void)startAsync
 {
     NSMutableURLRequest* request = [self setupRequest];
-    NSURLConnection *connection = [[NSURLConnection alloc] initWithRequest:request delegate:self];
-    [connection release];
+    if(request)
+    {
+        NSURLConnection *connection = [[NSURLConnection alloc] initWithRequest:request delegate:self];
+        [connection release];
+    }
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //I STRONGLY recommend you do not use it
@@ -92,8 +126,26 @@ static NSInteger DefaultTimeout = 10;
 - (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response
 {
     [receivedData setLength:0];
-    NSHTTPURLResponse* httpResponse = (NSHTTPURLResponse*)response;
-    statusCode = [httpResponse statusCode];
+    [lastModified release];
+    if ([response isKindOfClass:[NSHTTPURLResponse self]]) 
+    {
+        NSHTTPURLResponse* httpResponse = (NSHTTPURLResponse*)response;
+        statusCode = [httpResponse statusCode];
+		NSDictionary *headers = [httpResponse allHeaderFields];
+		NSString *modified = [headers objectForKey:@"Last-Modified"];
+		if (modified) 
+        {
+			NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+			//avoid problem if the user's locale is incompatible with HTTP-style dates
+			[dateFormatter setLocale:[[[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"] autorelease]];
+            
+			[dateFormatter setDateFormat:@"EEE, dd MMM yyyy HH:mm:ss zzz"];
+			lastModified = [[dateFormatter dateFromString:modified] retain];
+			[dateFormatter release];
+		}
+		else
+			lastModified = [[NSDate dateWithTimeIntervalSinceReferenceDate:0] retain];
+	}
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 - (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data
@@ -115,6 +167,11 @@ static NSInteger DefaultTimeout = 10;
         [self.delegate requestFailed:self];
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+- (NSCachedURLResponse *) connection:(NSURLConnection *)connection willCacheResponse:(NSCachedURLResponse *)cachedResponse
+{
+    return nil;
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //caching functions
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -128,6 +185,63 @@ static NSInteger DefaultTimeout = 10;
 -(void)setCacheTimeout:(NSInteger)seconds
 {
     self.cacheModel = GPHTTPCacheCustomTime;
+    cacheTimeout = seconds;
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//check and see if there is a request to use in the cache
+-(BOOL)checkCache
+{
+    if(cacheModel == GPHTTPIgnoreCache)
+        return NO;
+    NSURLCache *sharedCache = [[NSURLCache alloc] initWithMemoryCapacity:0
+                                                            diskCapacity:0
+                                                                diskPath:nil];
+    [NSURLCache setSharedURLCache:sharedCache];
+    [sharedCache release];
+
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString* dataPath = [[paths objectAtIndex:0] stringByAppendingPathComponent:@"GPHTTPRequestCache"];
+    
+	if (![[NSFileManager defaultManager] fileExistsAtPath:dataPath])
+    {
+        [[NSFileManager defaultManager] createDirectoryAtPath:dataPath
+                                  withIntermediateDirectories:NO
+                                                   attributes:nil
+                                                        error:nil];
+    }
+    NSString* checkPath = [dataPath stringByAppendingFormat:@"/%@",[GPHTTPRequest keyForURL:self.URL]];
+    if([[NSFileManager defaultManager] fileExistsAtPath:checkPath])
+    {
+        [receivedData setLength:0];
+        [receivedData appendData:[[NSFileManager defaultManager] contentsAtPath:checkPath]];
+        if([self.delegate respondsToSelector:@selector(requestFinished:)])
+            [self.delegate requestFinished:self];
+        if(cacheModel == GPHTTPUseCacheAndUpdate)
+        {
+            isFinished = YES;
+            return NO;
+        }
+        return YES;
+    }
+    return NO;
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
++ (NSString *)keyForURL:(NSURL*)url
+{
+	NSString *urlString = [url absoluteString];
+	if ([urlString length] == 0) {
+		return nil;
+	}
+    
+	// Strip trailing slashes
+	if ([[urlString substringFromIndex:[urlString length]-1] isEqualToString:@"/"])
+		urlString = [urlString substringToIndex:[urlString length]-1];
+    
+	// Borrowed from: http://stackoverflow.com/questions/652300/using-md5-hash-on-a-string-in-cocoa
+	const char *cStr = [urlString UTF8String];
+	unsigned char result[16];
+	CC_MD5(cStr, (CC_LONG)strlen(cStr), result);
+	return [NSString stringWithFormat:@"%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X",result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7],result[8], result[9], result[10], result[11],result[12], result[13], result[14], result[15]]; 	
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -307,6 +421,7 @@ static NSInteger DefaultTimeout = 10;
     [requestHeaders release];
     [postValues release];
     [postFiles release];
+    [lastModified release];
     [super dealloc];
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -319,13 +434,7 @@ static NSInteger DefaultTimeout = 10;
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 +(GPHTTPRequest*)requestWithURL:(NSURL*)URL
 {
-    GPHTTPRequest* request = [[[GPHTTPRequest alloc] init] autorelease];
-    request.requestType = GPHTTPRequestGET;
-    request.URL = URL;
-    request.allowCompression = YES;
-    request.timeout = DefaultTimeout;
-    request.stringEncoding = NSUTF8StringEncoding;
-    return request;
+    return [[[GPHTTPRequest alloc] initWithURL:URL] autorelease];
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //set defaults

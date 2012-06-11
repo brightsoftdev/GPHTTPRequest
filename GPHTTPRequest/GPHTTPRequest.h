@@ -53,6 +53,8 @@ typedef enum{
     NSMutableArray* postFiles;
     GPHTTPRequestCache cacheModel;
     BOOL didUseCache;
+    NSInteger cacheTimeout;
+    NSDate* lastModified;
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //properties
@@ -67,6 +69,12 @@ typedef enum{
 @property(nonatomic,retain,readonly)NSArray* postFiles;
 @property(nonatomic,assign)GPHTTPRequestCache cacheModel;
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//init
+-(id)initWithURL:(NSURL*)url;
+-(id)initWithString:(NSString*)string;
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//modify/start request
 -(void)startSync;
 -(void)startAsync;
 -(void)addRequestHeader:(NSString*)value key:(NSString*)key;
