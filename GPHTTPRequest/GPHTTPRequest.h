@@ -68,6 +68,7 @@ typedef enum{
 @property(nonatomic,retain,readonly)NSDictionary* postValues;
 @property(nonatomic,retain,readonly)NSArray* postFiles;
 @property(nonatomic,assign)GPHTTPRequestCache cacheModel;
+@property(nonatomic,assign)NSInteger cacheTimeout;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //init

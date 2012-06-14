@@ -18,6 +18,9 @@
 -(NSString*)putString:(NSString*)stringBoundary;
 -(NSString*)encodeString:(NSString*)string;
 
+-(void)finishWithCache:(NSString*)checkPath;
+-(NSDate*)fileModifyDate:(NSString*)path;
+
 @end
 
 @implementation GPHTTPRequest
@@ -33,6 +36,7 @@
 @synthesize postValues = postValues;
 @synthesize postFiles = postFiles;
 @synthesize cacheModel = cacheModel;
+@synthesize cacheTimeout = cacheTimeout;
 
 static NSString* DefaultUserAgent = @"";
 static NSInteger DefaultTimeout = 10; 
@@ -43,11 +47,12 @@ static NSInteger DefaultTimeout = 10;
     if(self = [super init])
     {
         self.requestType = GPHTTPRequestGET;
-        self.URL = URL;
+        self.URL = url;
         self.allowCompression = YES;
         self.timeout = DefaultTimeout;
         self.stringEncoding = NSUTF8StringEncoding;
         self.cacheModel = GPHTTPCacheIfModifed;
+        cacheTimeout = 0;
     }
     return self;
 }
@@ -131,20 +136,36 @@ static NSInteger DefaultTimeout = 10;
     {
         NSHTTPURLResponse* httpResponse = (NSHTTPURLResponse*)response;
         statusCode = [httpResponse statusCode];
-		NSDictionary *headers = [httpResponse allHeaderFields];
-		NSString *modified = [headers objectForKey:@"Last-Modified"];
-		if (modified) 
+        NSDictionary *headers = [httpResponse allHeaderFields];
+
+        NSString *modified = [headers objectForKey:@"Last-Modified"];
+        //if(!modified)
+        //    modified = [headers objectForKey:@"Expires"];
+        if (modified) 
         {
-			NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
-			//avoid problem if the user's locale is incompatible with HTTP-style dates
-			[dateFormatter setLocale:[[[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"] autorelease]];
+            NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+            //avoid problem if the user's locale is incompatible with HTTP-style dates
+            [dateFormatter setLocale:[[[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"] autorelease]];
             
-			[dateFormatter setDateFormat:@"EEE, dd MMM yyyy HH:mm:ss zzz"];
-			lastModified = [[dateFormatter dateFromString:modified] retain];
-			[dateFormatter release];
-		}
-		else
-			lastModified = [[NSDate dateWithTimeIntervalSinceReferenceDate:0] retain];
+            [dateFormatter setDateFormat:@"EEE, dd MMM yyyy HH:mm:ss zzz"];
+            lastModified = [[dateFormatter dateFromString:modified] retain];
+            [dateFormatter release];
+        }
+        /*else if([headers objectForKey:@"Cache-Control"])
+        {
+            NSString* cache = [headers objectForKey:@"Cache-Control"];
+            int age = 0;
+            NSRange range = [cache rangeOfString:@"max-age="];
+            if(range.location != NSNotFound)
+            {
+                NSRange end = [cache rangeOfString:@","];
+                if(end.location == NSNotFound)
+                    end.location = cache.length;
+                int start = range.location + range.length;
+                age = [[cache substringWithRange:NSMakeRange(start, end.location-start)] intValue];
+            }
+            lastModified = [[NSDate dateWithTimeIntervalSinceNow:-age] retain];
+        }*/
 	}
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -156,6 +177,8 @@ static NSInteger DefaultTimeout = 10;
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection
 {
     isFinished = YES;
+    if(cacheModel != GPHTTPIgnoreCache)
+        [self writeCache];
     if([self.delegate respondsToSelector:@selector(requestFinished:)])
         [self.delegate requestFinished:self];
 }
@@ -199,33 +222,66 @@ static NSInteger DefaultTimeout = 10;
     [NSURLCache setSharedURLCache:sharedCache];
     [sharedCache release];
 
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    NSString* dataPath = [[paths objectAtIndex:0] stringByAppendingPathComponent:@"GPHTTPRequestCache"];
-    
-	if (![[NSFileManager defaultManager] fileExistsAtPath:dataPath])
-    {
-        [[NSFileManager defaultManager] createDirectoryAtPath:dataPath
-                                  withIntermediateDirectories:NO
-                                                   attributes:nil
-                                                        error:nil];
-    }
+    NSString* dataPath = [GPHTTPRequest cacheDirectory];
     NSString* checkPath = [dataPath stringByAppendingFormat:@"/%@",[GPHTTPRequest keyForURL:self.URL]];
-    if([[NSFileManager defaultManager] fileExistsAtPath:checkPath])
-    {
-        [receivedData setLength:0];
-        [receivedData appendData:[[NSFileManager defaultManager] contentsAtPath:checkPath]];
-        if([self.delegate respondsToSelector:@selector(requestFinished:)])
-            [self.delegate requestFinished:self];
-        if(cacheModel == GPHTTPUseCacheAndUpdate)
+    if(cacheModel != GPHTTPIgnoreCache)
+    {        
+        if([[NSFileManager defaultManager] fileExistsAtPath:checkPath])
         {
-            isFinished = YES;
-            return NO;
+            if(cacheModel == GPHTTPUseCacheAndUpdate || cacheModel == GPHTTPJustUseCache)
+            {
+                [self finishWithCache:checkPath];
+                if(cacheModel == GPHTTPJustUseCache)
+                    return YES;
+                return NO;
+            }
+            
+            NSDate* date = [self fileModifyDate:checkPath];
+            if(!date)
+                return NO;
+            
+            NSTimeInterval fileCache = fabs([date timeIntervalSinceNow]);
+            BOOL doCache = NO;
+            if(cacheModel == GPHTTPCacheIfModifed)
+            {
+                NSDate* now = [NSDate date];
+                NSComparisonResult result = [now compare:date];
+                NSComparisonResult type = NSOrderedDescending;
+                if(result  == type)
+                    doCache = YES;
+                //NSTimeInterval time = fabs([now timeIntervalSinceNow]);
+                //if(fileCache > time)
+                //    doCache = YES;
+            }
+            else
+            {
+                NSTimeInterval time = self.cacheTimeout;
+                if(fileCache < time)
+                    doCache = YES;
+            }
+            
+            if(doCache)
+            {
+                [self finishWithCache:checkPath];
+                return YES;
+            }
         }
-        return YES;
     }
     return NO;
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//complete request with cache
+-(void)finishWithCache:(NSString*)path
+{
+    didUseCache = YES;
+    isFinished = YES;
+    [receivedData setLength:0];
+    [receivedData appendData:[[NSFileManager defaultManager] contentsAtPath:path]];
+    if([self.delegate respondsToSelector:@selector(requestFinished:)])
+        [self.delegate requestFinished:self];
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//MD5 hash of URL
 + (NSString *)keyForURL:(NSURL*)url
 {
 	NSString *urlString = [url absoluteString];
@@ -242,6 +298,47 @@ static NSInteger DefaultTimeout = 10;
 	unsigned char result[16];
 	CC_MD5(cStr, (CC_LONG)strlen(cStr), result);
 	return [NSString stringWithFormat:@"%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X",result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7],result[8], result[9], result[10], result[11],result[12], result[13], result[14], result[15]]; 	
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//the cacheDirectory on disk
++(NSString*)cacheDirectory
+{
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString* dataPath = [[paths objectAtIndex:0] stringByAppendingPathComponent:@"GPHTTPRequestCache"];
+    
+	if (![[NSFileManager defaultManager] fileExistsAtPath:dataPath])
+    {
+        [[NSFileManager defaultManager] createDirectoryAtPath:dataPath
+                                  withIntermediateDirectories:NO
+                                                   attributes:nil
+                                                        error:nil];
+    }
+    return dataPath;
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//write to cache directory
+-(void)writeCache
+{
+    NSString* dataPath = [GPHTTPRequest cacheDirectory];
+    NSString* checkPath = [dataPath stringByAppendingFormat:@"/%@",[GPHTTPRequest keyForURL:self.URL]];
+    [receivedData writeToURL:[NSURL fileURLWithPath:checkPath] atomically:NO];
+    if(cacheModel == GPHTTPCacheIfModifed)
+    {
+        NSDictionary *dict = [[NSDictionary alloc] initWithObjectsAndKeys:lastModified, NSFileModificationDate, nil];
+        [[NSFileManager defaultManager] setAttributes:dict ofItemAtPath:checkPath error:nil];
+    }
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+-(NSDate*)fileModifyDate:(NSString*)path
+{
+    NSDate* date = nil;
+    if([[NSFileManager defaultManager] fileExistsAtPath:path])
+    {
+        NSDictionary *attributes = [[NSFileManager defaultManager] attributesOfItemAtPath:path error:nil];
+        if (attributes)
+            date = [attributes fileModificationDate];
+    }
+    return date;
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
