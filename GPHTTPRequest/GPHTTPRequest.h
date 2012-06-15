@@ -55,6 +55,7 @@ typedef enum{
     BOOL didUseCache;
     NSInteger cacheTimeout;
     NSDate* lastModified;
+    NSDate* expiresDate;
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //properties
@@ -93,7 +94,8 @@ typedef enum{
 //caching functions
 -(BOOL)didLoadFromCache;
 -(void)setCacheTimeout:(NSInteger)seconds;
-
++(NSString*)cacheDirectory;
++(NSString *)keyForURL:(NSURL*)url;
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //public factory methods
 +(GPHTTPRequest*)requestWithURL:(NSURL*)URL;

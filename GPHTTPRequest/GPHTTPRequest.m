@@ -18,8 +18,9 @@
 -(NSString*)putString:(NSString*)stringBoundary;
 -(NSString*)encodeString:(NSString*)string;
 
+-(NSDate*)httpDateFormat:(NSString*)string;
 -(void)finishWithCache:(NSString*)checkPath;
--(NSDate*)fileModifyDate:(NSString*)path;
+-(NSDictionary*)fileModifyDate:(NSString*)path;
 
 @end
 
@@ -132,26 +133,21 @@ static NSInteger DefaultTimeout = 10;
 {
     [receivedData setLength:0];
     [lastModified release];
+    [expiresDate release];
     if ([response isKindOfClass:[NSHTTPURLResponse self]]) 
     {
         NSHTTPURLResponse* httpResponse = (NSHTTPURLResponse*)response;
         statusCode = [httpResponse statusCode];
         NSDictionary *headers = [httpResponse allHeaderFields];
+        //NSLog(@"headers: %@",headers);
 
         NSString *modified = [headers objectForKey:@"Last-Modified"];
-        //if(!modified)
-        //    modified = [headers objectForKey:@"Expires"];
+        NSString* expire = [headers objectForKey:@"Expires"];
         if (modified) 
-        {
-            NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
-            //avoid problem if the user's locale is incompatible with HTTP-style dates
-            [dateFormatter setLocale:[[[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"] autorelease]];
-            
-            [dateFormatter setDateFormat:@"EEE, dd MMM yyyy HH:mm:ss zzz"];
-            lastModified = [[dateFormatter dateFromString:modified] retain];
-            [dateFormatter release];
-        }
-        /*else if([headers objectForKey:@"Cache-Control"])
+            lastModified = [[self httpDateFormat:modified] retain];
+        if(expire)
+            expiresDate = [[self httpDateFormat:expire] retain];
+        else if([headers objectForKey:@"Cache-Control"])
         {
             NSString* cache = [headers objectForKey:@"Cache-Control"];
             int age = 0;
@@ -164,9 +160,21 @@ static NSInteger DefaultTimeout = 10;
                 int start = range.location + range.length;
                 age = [[cache substringWithRange:NSMakeRange(start, end.location-start)] intValue];
             }
-            lastModified = [[NSDate dateWithTimeIntervalSinceNow:-age] retain];
-        }*/
+            expiresDate = [[NSDate dateWithTimeIntervalSinceNow:-age] retain];
+        }
 	}
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+-(NSDate*)httpDateFormat:(NSString*)string
+{
+    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+    //avoid problem if the user's locale is incompatible with HTTP-style dates
+    [dateFormatter setLocale:[[[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"] autorelease]];
+    
+    [dateFormatter setDateFormat:@"EEE, dd MMM yyyy HH:mm:ss zzz"];
+    NSDate* date = [dateFormatter dateFromString:string];
+    [dateFormatter release];
+    return date;
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 - (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data
@@ -236,25 +244,35 @@ static NSInteger DefaultTimeout = 10;
                 return NO;
             }
             
-            NSDate* date = [self fileModifyDate:checkPath];
+            NSDictionary* attribs = [self fileModifyDate:checkPath];
+            //NSLog(@"attribs: %@",attribs);
+            NSDate* date = [attribs fileCreationDate];
+            
+            NSDate* expires = [attribs fileModificationDate];
             if(!date)
                 return NO;
             
-            NSTimeInterval fileCache = fabs([date timeIntervalSinceNow]);
             BOOL doCache = NO;
             if(cacheModel == GPHTTPCacheIfModifed)
             {
+                NSDate* constDate = [[[NSDate alloc] initWithTimeIntervalSince1970:30] autorelease];
                 NSDate* now = [NSDate date];
                 NSComparisonResult result = [now compare:date];
-                NSComparisonResult type = NSOrderedDescending;
-                if(result  == type)
+                if(result  == NSOrderedDescending && ![date isEqualToDate:constDate])
                     doCache = YES;
-                //NSTimeInterval time = fabs([now timeIntervalSinceNow]);
-                //if(fileCache > time)
-                //    doCache = YES;
+                
+                result = [now compare:expires];
+                if(result  == NSOrderedAscending)
+                    doCache = YES;
+                else
+                {
+                    [[NSFileManager defaultManager] removeItemAtURL:[NSURL fileURLWithPath:checkPath] error:nil];
+                    return NO;
+                }
             }
             else
             {
+                NSTimeInterval fileCache = fabs([expires timeIntervalSinceNow]);
                 NSTimeInterval time = self.cacheTimeout;
                 if(fileCache < time)
                     doCache = YES;
@@ -324,21 +342,26 @@ static NSInteger DefaultTimeout = 10;
     [receivedData writeToURL:[NSURL fileURLWithPath:checkPath] atomically:NO];
     if(cacheModel == GPHTTPCacheIfModifed)
     {
-        NSDictionary *dict = [[NSDictionary alloc] initWithObjectsAndKeys:lastModified, NSFileModificationDate, nil];
+        NSMutableDictionary* dict = [NSMutableDictionary dictionary];
+        if(lastModified)
+            [dict setObject:lastModified forKey:NSFileCreationDate];
+        if(expiresDate)
+            [dict setObject:expiresDate forKey:NSFileModificationDate];
+        if(!lastModified)
+            [dict setObject:[[[NSDate alloc] initWithTimeIntervalSince1970:30] autorelease] forKey:NSFileCreationDate];
+        
         [[NSFileManager defaultManager] setAttributes:dict ofItemAtPath:checkPath error:nil];
     }
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
--(NSDate*)fileModifyDate:(NSString*)path
+-(NSDictionary*)fileModifyDate:(NSString*)path
 {
-    NSDate* date = nil;
     if([[NSFileManager defaultManager] fileExistsAtPath:path])
     {
         NSDictionary *attributes = [[NSFileManager defaultManager] attributesOfItemAtPath:path error:nil];
-        if (attributes)
-            date = [attributes fileModificationDate];
+        return attributes;
     }
-    return date;
+    return nil;
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -519,6 +542,7 @@ static NSInteger DefaultTimeout = 10;
     [postValues release];
     [postFiles release];
     [lastModified release];
+    [expiresDate release];
     [super dealloc];
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
