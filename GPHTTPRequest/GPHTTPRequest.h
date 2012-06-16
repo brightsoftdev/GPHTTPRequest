@@ -34,10 +34,11 @@ typedef enum{
 //notifies when a request finishes
 -(void)requestFinished:(GPHTTPRequest*)request;
 -(void)requestFailed:(GPHTTPRequest*)request;
+-(void)setProgress:(float)progress;
 
 @end
 
-@interface GPHTTPRequest : NSObject
+@interface GPHTTPRequest : NSOperation<GPHTTPRequestDelegate>
 {
     NSMutableData* receivedData;
     GPHTTPRequestType requestType;
@@ -49,6 +50,7 @@ typedef enum{
     NSMutableDictionary* requestHeaders;
     NSStringEncoding stringEncoding;
     BOOL isFinished;
+    BOOL isExecuting;
     NSMutableDictionary* postValues;
     NSMutableArray* postFiles;
     GPHTTPRequestCache cacheModel;
@@ -56,6 +58,9 @@ typedef enum{
     NSInteger cacheTimeout;
     NSDate* lastModified;
     NSDate* expiresDate;
+    BOOL trackProgress;
+    unsigned long long contentLength;
+    unsigned long long progessLength;
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //properties
@@ -70,6 +75,7 @@ typedef enum{
 @property(nonatomic,retain,readonly)NSArray* postFiles;
 @property(nonatomic,assign)GPHTTPRequestCache cacheModel;
 @property(nonatomic,assign)NSInteger cacheTimeout;
+@property(nonatomic,assign)BOOL trackProgress;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //init
@@ -90,6 +96,7 @@ typedef enum{
 //request finished
 -(NSString*)responseString;
 -(NSData*)responseData;
+-(unsigned long long)responseLength;
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //caching functions
 -(BOOL)didLoadFromCache;

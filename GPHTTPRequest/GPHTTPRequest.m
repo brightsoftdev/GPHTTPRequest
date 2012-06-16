@@ -21,6 +21,8 @@
 -(NSDate*)httpDateFormat:(NSString*)string;
 -(void)finishWithCache:(NSString*)checkPath;
 -(NSDictionary*)fileModifyDate:(NSString*)path;
+-(void)updateProgess;
+-(void)startTracking:(BOOL)sync;
 
 @end
 
@@ -38,10 +40,12 @@
 @synthesize postFiles = postFiles;
 @synthesize cacheModel = cacheModel;
 @synthesize cacheTimeout = cacheTimeout;
+@synthesize trackProgress = trackProgress;
 
 static NSString* DefaultUserAgent = @"";
 static NSInteger DefaultTimeout = 10; 
 
+static NSString *GPHTTPRequestRunLoopMode = @"GPHTTPRequestRunLoopMode";
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 -(id)initWithURL:(NSURL*)url
 {
@@ -54,6 +58,9 @@ static NSInteger DefaultTimeout = 10;
         self.stringEncoding = NSUTF8StringEncoding;
         self.cacheModel = GPHTTPCacheIfModifed;
         cacheTimeout = 0;
+        isExecuting = NO;
+        isFinished = NO;
+        contentLength = 0;
     }
     return self;
 }
@@ -72,6 +79,7 @@ static NSInteger DefaultTimeout = 10;
     if([self checkCache])
     {
         isFinished = YES;
+        [self finish];
         return nil;
     }
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:self.URL
@@ -109,14 +117,21 @@ static NSInteger DefaultTimeout = 10;
     NSMutableURLRequest* request = [self setupRequest];
     if(request)
     {
+        if(self.trackProgress && progessLength == 0)
+        {
+            [self startTracking:NO];
+            return;
+        }
         NSURLConnection *connection = [[NSURLConnection alloc] initWithRequest:request delegate:self];
         [connection release];
     }
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//I STRONGLY recommend you do not use it
+//Better if you can use async request instead
 -(void)startSync
 {
+    if(self.trackProgress)
+        [self startTracking:YES];
     [self startAsync];
     while (!isFinished) 
         [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]];
@@ -141,12 +156,16 @@ static NSInteger DefaultTimeout = 10;
         NSDictionary *headers = [httpResponse allHeaderFields];
         //NSLog(@"headers: %@",headers);
 
+        contentLength = [[headers objectForKey:@"Content-Length"] longLongValue];
+        if(contentLength == 0)
+            contentLength = -1;
         NSString *modified = [headers objectForKey:@"Last-Modified"];
         NSString* expire = [headers objectForKey:@"Expires"];
-        if (modified) 
-            lastModified = [[self httpDateFormat:modified] retain];
+            NSDate* date = nil;
         if(expire)
-            expiresDate = [[self httpDateFormat:expire] retain];
+            date = [self httpDateFormat:expire];
+        if(date)
+            expiresDate = [date retain];
         else if([headers objectForKey:@"Cache-Control"])
         {
             NSString* cache = [headers objectForKey:@"Cache-Control"];
@@ -160,8 +179,10 @@ static NSInteger DefaultTimeout = 10;
                 int start = range.location + range.length;
                 age = [[cache substringWithRange:NSMakeRange(start, end.location-start)] intValue];
             }
-            expiresDate = [[NSDate dateWithTimeIntervalSinceNow:-age] retain];
+            expiresDate = [[NSDate dateWithTimeIntervalSinceNow:age] retain];
         }
+        else if (modified) 
+            lastModified = [[self httpDateFormat:modified] retain];
 	}
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -180,20 +201,23 @@ static NSInteger DefaultTimeout = 10;
 - (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data
 {
     [receivedData appendData:data];
+    [self updateProgess];
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection
 {
-    isFinished = YES;
-    if(cacheModel != GPHTTPIgnoreCache)
+    [self finish];
+    if(cacheModel != GPHTTPIgnoreCache && requestType == GPHTTPRequestGET)
         [self writeCache];
     if([self.delegate respondsToSelector:@selector(requestFinished:)])
         [self.delegate requestFinished:self];
+    //[connection release];
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 - (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error
 {
     isFinished = YES;
+    [self finish];
     if([self.delegate respondsToSelector:@selector(requestFailed:)])
         [self.delegate requestFailed:self];
 }
@@ -265,10 +289,7 @@ static NSInteger DefaultTimeout = 10;
                 if(result  == NSOrderedAscending)
                     doCache = YES;
                 else
-                {
-                    [[NSFileManager defaultManager] removeItemAtURL:[NSURL fileURLWithPath:checkPath] error:nil];
                     return NO;
-                }
             }
             else
             {
@@ -518,6 +539,48 @@ static NSInteger DefaultTimeout = 10;
     return [encodedURL autorelease];
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//request progress tracking
+-(void)updateProgess
+{
+    if(!self.trackProgress || progessLength <= 0)
+        return;
+    float increment = 100.0f/progessLength;
+    float progress = (increment*receivedData.length);
+    if(progress > 1)
+        progress = 1;
+    if([self.delegate respondsToSelector:@selector(setProgress:)])
+        [self.delegate setProgress:progress];
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+-(void)startTracking:(BOOL)sync
+{
+    GPHTTPRequest* request = [GPHTTPRequest requestWithURL:self.URL];
+    request.requestType = GPHTTPRequestHEAD;
+    if(sync)
+    {
+        [request startSync];
+        progessLength = [request responseLength];
+    }
+    else
+    {
+        request.delegate = [self retain];
+        [request startAsync];
+    }
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+-(void)requestFinished:(GPHTTPRequest *)request
+{
+    progessLength = [request responseLength];
+    [self startAsync];
+    [request.delegate release];
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//just forward the failed head request to our controller to let them know what happen
+-(void)requestFailed:(GPHTTPRequest *)request
+{
+    if([self.delegate respondsToSelector:@selector(requestFailed:)])
+        [self.delegate requestFailed:request];
+}
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //request response
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -533,6 +596,11 @@ static NSInteger DefaultTimeout = 10;
     return receivedData;
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+-(unsigned long long)responseLength
+{
+    return contentLength;
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 -(void)dealloc
 {
     self.URL = nil;
@@ -544,6 +612,50 @@ static NSInteger DefaultTimeout = 10;
     [lastModified release];
     [expiresDate release];
     [super dealloc];
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//NSOperation implemention
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+- (void)start
+{
+    if (![NSThread isMainThread])
+    {
+        [self performSelectorOnMainThread:@selector(start) withObject:nil waitUntilDone:NO];
+        return;
+    }
+    
+    [self willChangeValueForKey:@"isExecuting"];
+    isExecuting = YES;
+    [self didChangeValueForKey:@"isExecuting"];
+    
+    [self startAsync];
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+- (void)finish
+{
+    [self willChangeValueForKey:@"isExecuting"];
+    [self willChangeValueForKey:@"isFinished"];
+    
+    isExecuting = NO;
+    isFinished = YES;
+    
+    [self didChangeValueForKey:@"isExecuting"];
+    [self didChangeValueForKey:@"isFinished"];
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+- (BOOL)isConcurrent
+{
+    return YES;
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+- (BOOL)isFinished 
+{
+	return isFinished;
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+- (BOOL)isExecuting 
+{
+	return isExecuting;
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //public factory methods
