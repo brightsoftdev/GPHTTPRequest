@@ -7,6 +7,9 @@
 //
 
 #import <Foundation/Foundation.h>
+#if TARGET_OS_IPHONE && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_4_0
+#import <UIKit/UIKit.h> // Necessary for background task support
+#endif
 
 typedef enum{
     GPHTTPRequestGET,
@@ -24,6 +27,10 @@ typedef enum{
     GPHTTPIgnoreCache //ignore cache completely
 }GPHTTPRequestCache;
 
+#if NS_BLOCKS_AVAILABLE
+typedef void (^GPHTTPBlock)(void);
+#endif
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //delegate
 @class GPHTTPRequest;
@@ -40,6 +47,7 @@ typedef enum{
 
 @interface GPHTTPRequest : NSOperation<GPHTTPRequestDelegate>
 {
+    NSURLConnection *connection;
     NSMutableData* receivedData;
     GPHTTPRequestType requestType;
     NSURL* URL;
@@ -61,6 +69,14 @@ typedef enum{
     BOOL trackProgress;
     unsigned long long contentLength;
     unsigned long long progessLength;
+    #if NS_BLOCKS_AVAILABLE
+    GPHTTPBlock completionBlock;
+    GPHTTPBlock failureBlock;
+    #endif
+    #if TARGET_OS_IPHONE && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_4_0
+    BOOL continueInBackground;
+    UIBackgroundTaskIdentifier backgroundTask;
+    #endif
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //properties
@@ -76,7 +92,9 @@ typedef enum{
 @property(nonatomic,assign)GPHTTPRequestCache cacheModel;
 @property(nonatomic,assign)NSInteger cacheTimeout;
 @property(nonatomic,assign)BOOL trackProgress;
-
+#if TARGET_OS_IPHONE && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_4_0
+@property(nonatomic,assign)BOOL continueInBackground;
+#endif
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //init
 -(id)initWithURL:(NSURL*)url;
@@ -86,6 +104,10 @@ typedef enum{
 -(void)startSync;
 -(void)startAsync;
 -(void)addRequestHeader:(NSString*)value key:(NSString*)key;
+#if NS_BLOCKS_AVAILABLE
+-(void)setFinishBlock:(GPHTTPBlock)completeBlock;
+-(void)setFailedBlock:(GPHTTPBlock)failBlock;
+#endif
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //POST/PUT methods
 -(void)addPostValue:(id)value key:(NSString*)key;

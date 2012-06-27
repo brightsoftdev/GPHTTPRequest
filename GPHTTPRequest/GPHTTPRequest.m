@@ -23,6 +23,15 @@
 -(NSDictionary*)fileModifyDate:(NSString*)path;
 -(void)updateProgess;
 -(void)startTracking:(BOOL)sync;
+#if NS_BLOCKS_AVAILABLE
+- (void)releaseBlocksOnMainThread;
+#endif
+
+#if TARGET_OS_IPHONE && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_4_0
++(BOOL)isMultitaskingSupported;
+-(void)setupBackgroundTask;
+-(void)startBackgroundTask;
+#endif
 
 @end
 
@@ -41,6 +50,9 @@
 @synthesize cacheModel = cacheModel;
 @synthesize cacheTimeout = cacheTimeout;
 @synthesize trackProgress = trackProgress;
+#if TARGET_OS_IPHONE && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_4_0
+@synthesize continueInBackground = continueInBackground;
+#endif
 
 static NSString* DefaultUserAgent = @"";
 static NSInteger DefaultTimeout = 10; 
@@ -61,6 +73,9 @@ static NSString *GPHTTPRequestRunLoopMode = @"GPHTTPRequestRunLoopMode";
         isExecuting = NO;
         isFinished = NO;
         contentLength = 0;
+        #if TARGET_OS_IPHONE && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_4_0
+        [self setupBackgroundTask];
+        #endif
     }
     return self;
 }
@@ -122,9 +137,14 @@ static NSString *GPHTTPRequestRunLoopMode = @"GPHTTPRequestRunLoopMode";
             [self startTracking:NO];
             return;
         }
-        NSURLConnection *connection = [[NSURLConnection alloc] initWithRequest:request delegate:self];
         [connection release];
+        connection = nil;
+         connection = [[NSURLConnection alloc] initWithRequest:request delegate:self];
     }
+    
+    #if TARGET_OS_IPHONE && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_4_0
+    [self startBackgroundTask];
+    #endif
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Better if you can use async request instead
@@ -137,12 +157,35 @@ static NSString *GPHTTPRequestRunLoopMode = @"GPHTTPRequestRunLoopMode";
         [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]];
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+-(void)cancel
+{
+    [connection cancel];
+    [connection release];
+    connection = nil;
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 -(void)addRequestHeader:(NSString*)value key:(NSString*)key
 {
     if(!requestHeaders)
         requestHeaders = [[NSMutableDictionary alloc] init];
     [requestHeaders setValue:value forKey:key];
 }
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//block based request
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#if NS_BLOCKS_AVAILABLE
+-(void)setFinishBlock:(GPHTTPBlock)completeBlock
+{
+    [completionBlock release];
+	completionBlock = [completeBlock copy];
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+-(void)setFailedBlock:(GPHTTPBlock)failBlock
+{
+    [failureBlock release];
+	failureBlock = [failBlock copy];
+}
+#endif
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 - (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response
 {
@@ -204,22 +247,35 @@ static NSString *GPHTTPRequestRunLoopMode = @"GPHTTPRequestRunLoopMode";
     [self updateProgess];
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-- (void)connectionDidFinishLoading:(NSURLConnection *)connection
+- (void)connectionDidFinishLoading:(NSURLConnection *)currentConnection
 {
     [self finish];
     if(cacheModel != GPHTTPIgnoreCache && requestType == GPHTTPRequestGET)
         [self writeCache];
     if([self.delegate respondsToSelector:@selector(requestFinished:)])
         [self.delegate requestFinished:self];
-    //[connection release];
+    
+    #if NS_BLOCKS_AVAILABLE
+        if(completionBlock)
+            completionBlock();
+    #endif
+    [currentConnection release];
+    currentConnection = nil;
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-- (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error
+- (void)connection:(NSURLConnection *)currentConnection didFailWithError:(NSError *)error
 {
     isFinished = YES;
     [self finish];
     if([self.delegate respondsToSelector:@selector(requestFailed:)])
         [self.delegate requestFailed:self];
+    
+    #if NS_BLOCKS_AVAILABLE
+    if(failureBlock)
+        failureBlock();
+    #endif
+    [currentConnection release];
+    currentConnection = nil;
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 - (NSCachedURLResponse *) connection:(NSURLConnection *)connection willCacheResponse:(NSCachedURLResponse *)cachedResponse
@@ -318,6 +374,11 @@ static NSString *GPHTTPRequestRunLoopMode = @"GPHTTPRequestRunLoopMode";
     [receivedData appendData:[[NSFileManager defaultManager] contentsAtPath:path]];
     if([self.delegate respondsToSelector:@selector(requestFinished:)])
         [self.delegate requestFinished:self];
+    
+    #if NS_BLOCKS_AVAILABLE
+    if(completionBlock)
+        completionBlock();
+    #endif
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //MD5 hash of URL
@@ -603,6 +664,7 @@ static NSString *GPHTTPRequestRunLoopMode = @"GPHTTPRequestRunLoopMode";
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 -(void)dealloc
 {
+    [connection release];
     self.URL = nil;
     self.delegate = nil;
     [receivedData release];
@@ -611,8 +673,82 @@ static NSString *GPHTTPRequestRunLoopMode = @"GPHTTPRequestRunLoopMode";
     [postFiles release];
     [lastModified release];
     [expiresDate release];
+    #if NS_BLOCKS_AVAILABLE
+    [self releaseBlocksOnMainThread];
+    #endif
     [super dealloc];
 }
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#if NS_BLOCKS_AVAILABLE
+- (void)releaseBlocksOnMainThread
+{
+	NSMutableArray *blocks = [NSMutableArray array];
+	if (completionBlock) 
+    {
+		[blocks addObject:completionBlock];
+		[completionBlock release];
+		completionBlock = nil;
+	}
+	if (failureBlock) 
+    {
+		[blocks addObject:failureBlock];
+		[failureBlock release];
+		failureBlock = nil;
+	}
+	[[self class] performSelectorOnMainThread:@selector(releaseBlocks:) withObject:blocks waitUntilDone:[NSThread isMainThread]];
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Always called on main thread. Blocks will be released when this method exits
++ (void)releaseBlocks:(NSArray *)blocks{}
+#endif
+
+#if TARGET_OS_IPHONE && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_4_0
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//iOS backgrounding functions
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+-(void)setupBackgroundTask
+{
+    if ([GPHTTPRequest isMultitaskingSupported] && self.continueInBackground) 
+    {
+        backgroundTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^{
+            // Synchronize the cleanup call on the main thread in case
+            // the task actually finishes at around the same time.
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if (backgroundTask != UIBackgroundTaskInvalid)
+                {
+                    [[UIApplication sharedApplication] endBackgroundTask:backgroundTask];
+                    backgroundTask = UIBackgroundTaskInvalid;
+                    [self cancel];
+                }
+            });
+        }];
+    }
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+-(void)startBackgroundTask
+{
+    if ([GPHTTPRequest isMultitaskingSupported] && self.continueInBackground) 
+    {
+		dispatch_async(dispatch_get_main_queue(), ^{
+			if (backgroundTask != UIBackgroundTaskInvalid) 
+            {
+				[[UIApplication sharedApplication] endBackgroundTask:backgroundTask];
+				backgroundTask = UIBackgroundTaskInvalid;
+			}
+		});
+	}
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
++(BOOL)isMultitaskingSupported
+{
+    BOOL multiTaskingSupported = NO;
+	if ([[UIDevice currentDevice] respondsToSelector:@selector(isMultitaskingSupported)]) {
+		multiTaskingSupported = [(id)[UIDevice currentDevice] isMultitaskingSupported];
+	}
+	return multiTaskingSupported;
+}
+#endif
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //NSOperation implemention
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
