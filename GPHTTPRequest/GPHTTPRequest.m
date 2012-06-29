@@ -2,7 +2,7 @@
 //  GPHTTPRequest.m
 //  GPHTTPRequest
 //
-//  Created by Austin Cherry on 6/8/12.
+//  Created by Dalton Cherry on 6/8/12.
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
@@ -171,6 +171,18 @@ static NSString *GPHTTPRequestRunLoopMode = @"GPHTTPRequestRunLoopMode";
     [requestHeaders setValue:value forKey:key];
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//returns if the last error if the connection failed. nil if no error
+-(NSError*)error
+{
+    return connectionError;
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//returns the response header
+-(NSDictionary*)responseHeaders
+{
+    return connectionHeaders;
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //block based request
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #if NS_BLOCKS_AVAILABLE
@@ -192,12 +204,14 @@ static NSString *GPHTTPRequestRunLoopMode = @"GPHTTPRequestRunLoopMode";
     [receivedData setLength:0];
     [lastModified release];
     [expiresDate release];
+    [connectionError release];
     if ([response isKindOfClass:[NSHTTPURLResponse self]]) 
     {
         NSHTTPURLResponse* httpResponse = (NSHTTPURLResponse*)response;
         statusCode = [httpResponse statusCode];
         NSDictionary *headers = [httpResponse allHeaderFields];
         //NSLog(@"headers: %@",headers);
+        connectionHeaders = [headers retain];
 
         contentLength = [[headers objectForKey:@"Content-Length"] longLongValue];
         if(contentLength == 0)
@@ -265,6 +279,8 @@ static NSString *GPHTTPRequestRunLoopMode = @"GPHTTPRequestRunLoopMode";
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 - (void)connection:(NSURLConnection *)currentConnection didFailWithError:(NSError *)error
 {
+    [connectionError release];
+    connectionError = [error retain];
     isFinished = YES;
     [self finish];
     if([self.delegate respondsToSelector:@selector(requestFailed:)])
@@ -276,6 +292,18 @@ static NSString *GPHTTPRequestRunLoopMode = @"GPHTTPRequestRunLoopMode";
     #endif
     [currentConnection release];
     currentConnection = nil;
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+- (NSURLRequest*)connection:(NSURLConnection *)inConnection willSendRequest:(NSURLRequest*)inRequest redirectResponse:(NSURLResponse *)inRedirectResponse
+{
+    if (inRedirectResponse) 
+    {
+        NSMutableURLRequest *r = [[connection.originalRequest mutableCopy] autorelease]; // original request
+        [r setURL: [inRequest URL]];
+        return r;
+    } 
+    else 
+        return inRequest;
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 - (NSCachedURLResponse *) connection:(NSURLConnection *)connection willCacheResponse:(NSCachedURLResponse *)cachedResponse
@@ -664,9 +692,10 @@ static NSString *GPHTTPRequestRunLoopMode = @"GPHTTPRequestRunLoopMode";
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 -(void)dealloc
 {
-    [connection release];
     self.URL = nil;
     self.delegate = nil;
+    [connectionError release];
+    [connectionError release];
     [receivedData release];
     [requestHeaders release];
     [postValues release];

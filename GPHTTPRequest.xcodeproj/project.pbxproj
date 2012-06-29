@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5C9081A8159D4D260077C36C /* Reachability.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C9081A6159D4D260077C36C /* Reachability.h */; };
+		5C9081A9159D4D260077C36C /* Reachability.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C9081A6159D4D260077C36C /* Reachability.h */; };
+		5C9081AA159D4D260077C36C /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = 5C9081A7159D4D260077C36C /* Reachability.m */; };
+		5C9081AB159D4D260077C36C /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = 5C9081A7159D4D260077C36C /* Reachability.m */; };
 		5CE2C0761583F95B00463E97 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5CE2C0121582E5A800463E97 /* Cocoa.framework */; };
 		5CE2C07C1583F95B00463E97 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 5CE2C07A1583F95B00463E97 /* InfoPlist.strings */; };
 		5CE2C0871583F95B00463E97 /* SenTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5CE2C0241582E5A800463E97 /* SenTestingKit.framework */; };
@@ -43,6 +47,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		5C9081A6159D4D260077C36C /* Reachability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Reachability.h; sourceTree = "<group>"; };
+		5C9081A7159D4D260077C36C /* Reachability.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Reachability.m; sourceTree = "<group>"; };
 		5CE2C0121582E5A800463E97 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		5CE2C0151582E5A800463E97 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		5CE2C0161582E5A800463E97 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
@@ -158,6 +164,8 @@
 			children = (
 				5CE2C01B1582E5A800463E97 /* GPHTTPRequest.h */,
 				5CE2C01C1582E5A800463E97 /* GPHTTPRequest.m */,
+				5C9081A6159D4D260077C36C /* Reachability.h */,
+				5C9081A7159D4D260077C36C /* Reachability.m */,
 				5CE2C0E91583FC7E00463E97 /* tests */,
 			);
 			path = GPHTTPRequest;
@@ -253,6 +261,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5C9081A8159D4D260077C36C /* Reachability.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -260,6 +269,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5C9081A9159D4D260077C36C /* Reachability.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -429,6 +439,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5CE2C0E81583FC5D00463E97 /* GPHTTPRequest.m in Sources */,
+				5C9081AA159D4D260077C36C /* Reachability.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -445,6 +456,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5CE2C0E61583FC5800463E97 /* GPHTTPRequest.m in Sources */,
+				5C9081AB159D4D260077C36C /* Reachability.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -2,7 +2,7 @@
 //  GPHTTPRequest.h
 //  GPHTTPRequest
 //
-//  Created by Austin Cherry on 6/8/12.
+//  Created by Dalton Cherry on 6/8/12.
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
@@ -48,6 +48,8 @@ typedef void (^GPHTTPBlock)(void);
 @interface GPHTTPRequest : NSOperation<GPHTTPRequestDelegate>
 {
     NSURLConnection *connection;
+    NSError* connectionError;
+    NSDictionary* connectionHeaders;
     NSMutableData* receivedData;
     GPHTTPRequestType requestType;
     NSURL* URL;
@@ -119,6 +121,8 @@ typedef void (^GPHTTPBlock)(void);
 -(NSString*)responseString;
 -(NSData*)responseData;
 -(unsigned long long)responseLength;
+-(NSError*)error;
+-(NSDictionary*)responseHeaders;
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //caching functions
 -(BOOL)didLoadFromCache;
