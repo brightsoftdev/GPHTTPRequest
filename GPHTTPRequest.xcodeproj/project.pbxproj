@@ -11,6 +11,8 @@
 		5C9081A9159D4D260077C36C /* Reachability.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C9081A6159D4D260077C36C /* Reachability.h */; };
 		5C9081AA159D4D260077C36C /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = 5C9081A7159D4D260077C36C /* Reachability.m */; };
 		5C9081AB159D4D260077C36C /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = 5C9081A7159D4D260077C36C /* Reachability.m */; };
+		5C9081C015A69BC10077C36C /* libxml2.2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5C9081BF15A69BC10077C36C /* libxml2.2.dylib */; };
+		5C9081C215A69BDE0077C36C /* libxml2.2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5C9081C115A69BDE0077C36C /* libxml2.2.dylib */; };
 		5CE2C0761583F95B00463E97 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5CE2C0121582E5A800463E97 /* Cocoa.framework */; };
 		5CE2C07C1583F95B00463E97 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 5CE2C07A1583F95B00463E97 /* InfoPlist.strings */; };
 		5CE2C0871583F95B00463E97 /* SenTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5CE2C0241582E5A800463E97 /* SenTestingKit.framework */; };
@@ -49,6 +51,8 @@
 /* Begin PBXFileReference section */
 		5C9081A6159D4D260077C36C /* Reachability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Reachability.h; sourceTree = "<group>"; };
 		5C9081A7159D4D260077C36C /* Reachability.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Reachability.m; sourceTree = "<group>"; };
+		5C9081BF15A69BC10077C36C /* libxml2.2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libxml2.2.dylib; path = usr/lib/libxml2.2.dylib; sourceTree = SDKROOT; };
+		5C9081C115A69BDE0077C36C /* libxml2.2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libxml2.2.dylib; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.1.sdk/usr/lib/libxml2.2.dylib; sourceTree = DEVELOPER_DIR; };
 		5CE2C0121582E5A800463E97 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		5CE2C0151582E5A800463E97 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		5CE2C0161582E5A800463E97 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
@@ -81,6 +85,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5C9081C015A69BC10077C36C /* libxml2.2.dylib in Frameworks */,
 				5CE2C0761583F95B00463E97 /* Cocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -99,6 +104,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5C9081C215A69BDE0077C36C /* libxml2.2.dylib in Frameworks */,
 				5CE2C0A21583FB0F00463E97 /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -140,6 +146,8 @@
 		5CE2C0111582E5A800463E97 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				5C9081C115A69BDE0077C36C /* libxml2.2.dylib */,
+				5C9081BF15A69BC10077C36C /* libxml2.2.dylib */,
 				5CE2C0121582E5A800463E97 /* Cocoa.framework */,
 				5CE2C0241582E5A800463E97 /* SenTestingKit.framework */,
 				5CE2C0A11583FB0F00463E97 /* Foundation.framework */,
@@ -564,6 +572,7 @@
 				FRAMEWORK_VERSION = A;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "GPHTTPRequestFramework/GPHTTPRequestFramework-Prefix.pch";
+				HEADER_SEARCH_PATHS = "/usr/include/libxml2/**";
 				INFOPLIST_FILE = "GPHTTPRequestFramework/GPHTTPRequestFramework-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = framework;
@@ -578,6 +587,7 @@
 				FRAMEWORK_VERSION = A;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "GPHTTPRequestFramework/GPHTTPRequestFramework-Prefix.pch";
+				HEADER_SEARCH_PATHS = "/usr/include/libxml2/**";
 				INFOPLIST_FILE = "GPHTTPRequestFramework/GPHTTPRequestFramework-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = framework;
@@ -615,6 +625,7 @@
 				DSTROOT = /tmp/GPHTTPRequestLibrary.dst;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "GPHTTPRequestLibrary/GPHTTPRequestLibrary-Prefix.pch";
+				HEADER_SEARCH_PATHS = "/usr/include/libxml2/**";
 				IPHONEOS_DEPLOYMENT_TARGET = 5.1;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -630,6 +641,7 @@
 				DSTROOT = /tmp/GPHTTPRequestLibrary.dst;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "GPHTTPRequestLibrary/GPHTTPRequestLibrary-Prefix.pch";
+				HEADER_SEARCH_PATHS = "/usr/include/libxml2/**";
 				IPHONEOS_DEPLOYMENT_TARGET = 5.1;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
