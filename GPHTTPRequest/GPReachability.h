@@ -17,16 +17,16 @@ typedef enum {
 
 #define kReachabilityChangedNotification @"kNetworkReachabilityChangedNotification"
 
-@class Reachability;
+@class GPReachability;
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-@protocol ReachabilityDelegate <NSObject>
+@protocol GPReachabilityDelegate <NSObject>
 
 //notifies the delegates that the reachabilityChanged state changed
--(void)reachabilityChanged:(Reachability*)reach;
+-(void)reachabilityChanged:(GPReachability*)reach;
 
 @end
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-@interface Reachability : NSObject
+@interface GPReachability : NSObject
 {
     BOOL localWiFiRef;
 	SCNetworkReachabilityRef reachabilityRef;
@@ -40,19 +40,19 @@ typedef enum {
 -(void)stopNotifier;
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //multi cast delegate so you can have multi objects notified that reach state changed
--(void)addListener:(id<ReachabilityDelegate>)object;
+-(void)addListener:(id<GPReachabilityDelegate>)object;
 -(void)removeLister:(id)object;
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 - (NetworkStatus)currentReachabilityStatus;
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //factory methods
 //this only does host like google.com not a specific URL like google.com/index.html Do a head request for that
-+(Reachability*)reachableWithHost:(NSString*)host;
-+(Reachability*)reachableWithWan;
-+(Reachability*)reachableWithLan;
++(GPReachability*)reachableWithHost:(NSString*)host;
++(GPReachability*)reachableWithWan;
++(GPReachability*)reachableWithLan;
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //creates a static object that is designed to be used for checking internet state
-+(Reachability*)sharedNotifer;
++(GPReachability*)sharedNotifer;
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //returns of local wifi is available 
 +(BOOL)isLanReachable;

@@ -191,7 +191,7 @@ void error( void * ctx, const char * msg, ... )
                 if([key isEqualToString:@"src"] || [key isEqualToString:@"href"])
                 {
                     if([value rangeOfString:@"http"].location == NSNotFound)
-                        value = [NSString stringWithFormat:@"%@%@",mainRequest,value];
+                        value = [NSString stringWithFormat:@"%@/%@",self.URL,value];
                     NSString* urlString = value;
                     NSRange range = [value rangeOfString:@"/" options:NSBackwardsSearch];
                     if(range.location != NSNotFound)
@@ -199,17 +199,18 @@ void error( void * ctx, const char * msg, ... )
                         if(!requestQueue)
                         {
                             requestQueue = [[NSOperationQueue alloc] init];
-                            requestQueue.maxConcurrentOperationCount = 4;
+                            requestQueue.maxConcurrentOperationCount = 8;
                         }
-                        __block NSString* diskPath = [value substringFromIndex:range.location+1];
-                        GPHTTPRequest* request = [GPHTTPRequest requestWithString:urlString];
+                        value = [value substringFromIndex:range.location+1];
+                        __block NSString* diskPath = [value retain];
+                        __block GPHTTPRequest* request = [GPHTTPRequest requestWithString:urlString];
                         request.continueInBackground = self.continueInBackground;
                         [request setCompletionBlock:^{
                             [self writeToDisk:diskPath data:[request responseData]];
                         }];
                         request.cacheModel = GPHTTPIgnoreCache;
                         [requestQueue addOperation:request];
-                        //NSLog(@"value: %@",diskPath);
+                        NSLog(@"value: %@",diskPath);
                     }
                 }
                 attribString = [attribString stringByAppendingFormat:@"%@=\"%@\" ",key, value];
@@ -234,25 +235,23 @@ void error( void * ctx, const char * msg, ... )
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 -(void)documentDidEnd
 {
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    NSString *documentsDirectory = [paths objectAtIndex:0];
-    
-    //make a file name to write the data to using the documents directory:
-    NSString* file = self.URL;
-    if([file rangeOfString:@"."].location == NSNotFound)
-        file = [file stringByAppendingFormat:@".html"];
-    
-    NSString *fileName = [NSString stringWithFormat:@"%@/%@",documentsDirectory,file];
-    NSURL* url = [NSURL fileURLWithPath:fileName];
-    [HTMLContent writeToFile:fileName atomically:NO encoding:NSUTF8StringEncoding error:nil];
+    NSURL *fileName = [GPHTTPWebPage pathForSite:self.URL.absoluteString];
+    //NSURL* url = [NSURL fileURLWithPath:fileName];
+    //NSLog(@"fileName: %@",fileName);
+    [HTMLContent writeToURL:fileName atomically:NO encoding:NSUTF8StringEncoding error:nil];
+    [requestQueue waitUntilAllOperationsAreFinished];
+    //NSLog(@"html: %@",HTMLContent);
+    if([self.delegate respondsToSelector:@selector(webPageFinished:)])
+        [self.delegate webPageFinished:self];
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 -(void)writeToDisk:(NSString*)name data:(NSData*)data
 {
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    NSString *documentsDirectory = [paths objectAtIndex:0];
-    NSString *fileName = [NSString stringWithFormat:@"%@/%@",documentsDirectory,name];
-    [data writeToFile:fileName atomically:NO encoding:NSUTF8StringEncoding error:nil];
+    NSString *documentsDirectory = [GPHTTPWebPage docsDirectory];
+    NSString *fileName = [NSString stringWithFormat:@"%@/%@",documentsDirectory,[GPHTTPWebPage encodeURL:name]];
+    //NSLog(@"fileName: %@",fileName);
+    if(![data writeToFile:fileName atomically:NO]){}
+        //NSLog(@"GPHTTP request, failed to write: %@ to disk.",fileName);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -263,14 +262,52 @@ void error( void * ctx, const char * msg, ... )
     [super dealloc];
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
++(NSString*)docsDirectory
+{
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString* directory = [NSString stringWithFormat:@"%@/GPHTTPWebPage",[paths objectAtIndex:0]];
+    if(![[NSFileManager defaultManager] fileExistsAtPath:directory])
+        [[NSFileManager defaultManager] createDirectoryAtPath:directory withIntermediateDirectories:NO attributes:nil error:nil];
+    
+    return directory;
+}
+///////////////////////////////////////////////////////////////////////////////////////////////////
++(NSString*)encodeURL:(NSString*)string
+{
+    NSString * encodedURL = (NSString *)CFURLCreateStringByAddingPercentEscapes(
+                                                                                NULL,
+                                                                                (CFStringRef)string,
+                                                                                NULL,
+                                                                                (CFStringRef)@"!*'\"();:@&=+$,/?%#[] ",
+                                                                                kCFStringEncodingUTF8 );
+    return [encodedURL autorelease];
+}
+///////////////////////////////////////////////////////////////////////////////////////////////////
 +(NSURL*)pathForSite:(NSString*)urlString
 {
-    NSString* file = self.URL;
-    if([file rangeOfString:@"."].location == NSNotFound)
+    NSString *documentsDirectory = [GPHTTPWebPage docsDirectory];
+    NSString* file = urlString;
+    if([file rangeOfString:@".html"].location == NSNotFound)
         file = [file stringByAppendingFormat:@".html"];
+    NSRange range = [file rangeOfString:@"://"];
+    if(range.location != NSNotFound)
+        file = [file substringFromIndex:range.location+3];
     
-    NSString *fileName = [NSString stringWithFormat:@"%@/%@",documentsDirectory,file];
+    
+    NSString *fileName = [NSString stringWithFormat:@"%@/%@",documentsDirectory,[GPHTTPWebPage encodeURL:file]];
     return [NSURL fileURLWithPath:fileName];
+}
+///////////////////////////////////////////////////////////////////////////////////////////////////
+//factory methods
+///////////////////////////////////////////////////////////////////////////////////////////////////
++(GPHTTPWebPage*)requestWithString:(NSString*)string
+{
+    return [GPHTTPWebPage requestWithURL:[NSURL URLWithString:string]];
+}
+///////////////////////////////////////////////////////////////////////////////////////////////////
++(GPHTTPWebPage*)requestWithURL:(NSURL*)URL
+{
+    return [[[GPHTTPWebPage alloc] initWithURL:URL] autorelease];
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 

@@ -15,31 +15,31 @@
 
 #import <CoreFoundation/CoreFoundation.h>
 
-#import "Reachability.h"
+#import "GPReachability.h"
 
-@interface Reachability()
+@interface GPReachability()
 
 -(NetworkStatus)localWiFiStatusForFlags:(SCNetworkReachabilityFlags)flags;
 -(NetworkStatus)networkStatusForFlags:(SCNetworkReachabilityFlags)flags;
-+(Reachability*)reachabilityWithAddress:(const struct sockaddr_in*)hostAddress;
++(GPReachability*)reachabilityWithAddress:(const struct sockaddr_in*)hostAddress;
 
 @end
 
-@implementation Reachability
+@implementation GPReachability
 
-static Reachability* sharedNotifer;
+static GPReachability* sharedNotifer;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 static void ReachabilityCallback(SCNetworkReachabilityRef target, SCNetworkReachabilityFlags flags, void* info)
 {
     #pragma unused (target, flags)
 	NSCAssert(info != NULL, @"info was NULL in ReachabilityCallback");
-	NSCAssert([(NSObject*) info isKindOfClass: [Reachability class]], @"info was wrong class in ReachabilityCallback");
+	NSCAssert([(NSObject*) info isKindOfClass: [GPReachability class]], @"info was wrong class in ReachabilityCallback");
     
 	// in case someone uses the Reachablity object in a different thread.
 	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 	
-	Reachability* noteObject = (Reachability*) info;
+	GPReachability* noteObject = (GPReachability*) info;
 	// Post a notification to notify the client that the network reachability changed.
 	[[NSNotificationCenter defaultCenter] postNotificationName: kReachabilityChangedNotification object: noteObject];
 	
@@ -81,7 +81,7 @@ static void ReachabilityCallback(SCNetworkReachabilityRef target, SCNetworkReach
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //multi cast delegate
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
--(void)addListener:(id<ReachabilityDelegate>)object
+-(void)addListener:(id<GPReachabilityDelegate>)object
 {
     if(!delegates)
         delegates = [[NSMutableArray alloc] init];
@@ -95,9 +95,9 @@ static void ReachabilityCallback(SCNetworkReachabilityRef target, SCNetworkReach
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 -(void)reachChanged:(NSNotification* )note
 {
-	Reachability* curReach = [note object];
-	NSParameterAssert([curReach isKindOfClass: [Reachability class]]);
-    for(id<ReachabilityDelegate>object in delegates)
+	GPReachability* curReach = [note object];
+	NSParameterAssert([curReach isKindOfClass: [GPReachability class]]);
+    for(id<GPReachabilityDelegate>object in delegates)
         if([object respondsToSelector:@selector(reachabilityChanged:)])
             [object reachabilityChanged:curReach];
 }
@@ -165,9 +165,9 @@ static void ReachabilityCallback(SCNetworkReachabilityRef target, SCNetworkReach
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //factory methods
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-+(Reachability*)reachableWithHost:(NSString*)host
++(GPReachability*)reachableWithHost:(NSString*)host
 {
-    Reachability* reach = NULL;
+    GPReachability* reach = NULL;
 	SCNetworkReachabilityRef reachability = SCNetworkReachabilityCreateWithName(NULL, [host UTF8String]);
 	if(reachability!= NULL)
 	{
@@ -181,7 +181,7 @@ static void ReachabilityCallback(SCNetworkReachabilityRef target, SCNetworkReach
 	return reach;
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-+(Reachability*)reachableWithWan
++(GPReachability*)reachableWithWan
 {
     struct sockaddr_in zeroAddress;
 	bzero(&zeroAddress, sizeof(zeroAddress));
@@ -190,7 +190,7 @@ static void ReachabilityCallback(SCNetworkReachabilityRef target, SCNetworkReach
 	return [self reachabilityWithAddress: &zeroAddress];
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-+(Reachability*)reachableWithLan
++(GPReachability*)reachableWithLan
 {
     struct sockaddr_in localWifiAddress;
 	bzero(&localWifiAddress, sizeof(localWifiAddress));
@@ -198,27 +198,27 @@ static void ReachabilityCallback(SCNetworkReachabilityRef target, SCNetworkReach
 	localWifiAddress.sin_family = AF_INET;
 	// IN_LINKLOCALNETNUM is defined in <netinet/in.h> as 169.254.0.0
 	localWifiAddress.sin_addr.s_addr = htonl(IN_LINKLOCALNETNUM);
-	Reachability* reach = [self reachabilityWithAddress: &localWifiAddress];
+	GPReachability* reach = [self reachabilityWithAddress: &localWifiAddress];
 	if(reach != NULL)
 		reach->localWiFiRef = YES;
     
 	return reach;
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-+(Reachability*)sharedNotifer
++(GPReachability*)sharedNotifer
 {
     if(!sharedNotifer)
     {
-        sharedNotifer = [[Reachability reachableWithWan] retain];
+        sharedNotifer = [[GPReachability reachableWithWan] retain];
         [sharedNotifer startNotiferOnBackgroundThread];
     }
     return sharedNotifer;
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-+(Reachability*)reachabilityWithAddress:(const struct sockaddr_in*)hostAddress
++(GPReachability*)reachabilityWithAddress:(const struct sockaddr_in*)hostAddress
 {
 	SCNetworkReachabilityRef reachability = SCNetworkReachabilityCreateWithAddress(kCFAllocatorDefault, (const struct sockaddr*)hostAddress);
-	Reachability* retVal = NULL;
+	GPReachability* retVal = NULL;
 	if(reachability!= NULL)
 	{
 		retVal= [[[self alloc] init] autorelease];
@@ -235,7 +235,7 @@ static void ReachabilityCallback(SCNetworkReachabilityRef target, SCNetworkReach
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 +(BOOL)isLanReachable
 {
-    Reachability* reach = [Reachability reachableWithLan];
+    GPReachability* reach = [GPReachability reachableWithLan];
     if([reach currentReachabilityStatus] != NotReachable)
         return YES;
     return NO;
@@ -243,7 +243,7 @@ static void ReachabilityCallback(SCNetworkReachabilityRef target, SCNetworkReach
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 +(BOOL)isWanReachable
 {
-    Reachability* reach = [Reachability reachableWithWan];
+    GPReachability* reach = [GPReachability reachableWithWan];
     if([reach currentReachabilityStatus] == ReachableViaWWAN)
         return YES;
     return NO;
@@ -251,7 +251,7 @@ static void ReachabilityCallback(SCNetworkReachabilityRef target, SCNetworkReach
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 +(BOOL)isHostReachable:(NSString*)host
 {
-    Reachability* reach = [Reachability reachableWithHost:host];
+    GPReachability* reach = [GPReachability reachableWithHost:host];
     if([reach currentReachabilityStatus] != NotReachable)
         return YES;
     return NO;

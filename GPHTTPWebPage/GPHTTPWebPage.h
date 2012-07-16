@@ -15,8 +15,8 @@
 
 @optional
 //notifies when a request finishes
--(void)requestFinished:(GPHTTPWebPage*)request;
--(void)requestFailed:(GPHTTPWebPage*)request;
+-(void)webPageFinished:(GPHTTPWebPage*)request;
+-(void)webPageFailed:(GPHTTPWebPage*)request;
 
 @end
 
@@ -62,6 +62,11 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //load request from disk
 +(NSURL*)pathForSite:(NSString*)urlString;
++(NSString*)docsDirectory;
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//public factory methods
++(GPHTTPWebPage*)requestWithURL:(NSURL*)URL;
++(GPHTTPWebPage*)requestWithString:(NSString*)string;
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 

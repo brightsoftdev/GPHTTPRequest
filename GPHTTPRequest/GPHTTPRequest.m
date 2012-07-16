@@ -695,7 +695,6 @@ static NSString *GPHTTPRequestRunLoopMode = @"GPHTTPRequestRunLoopMode";
     self.URL = nil;
     self.delegate = nil;
     [connectionError release];
-    [connectionError release];
     [receivedData release];
     [requestHeaders release];
     [postValues release];
