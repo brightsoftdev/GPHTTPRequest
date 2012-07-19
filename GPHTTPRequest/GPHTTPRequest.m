@@ -44,6 +44,7 @@
 @synthesize statusCode = statusCode;
 @synthesize allowCompression = allowCompression;
 @synthesize timeout = timeout;
+@synthesize userAgent = userAgent;
 @synthesize stringEncoding = stringEncoding;
 @synthesize postValues = postValues;
 @synthesize postFiles = postFiles;
@@ -54,7 +55,7 @@
 @synthesize continueInBackground = continueInBackground;
 #endif
 
-static NSString* DefaultUserAgent = @"";
+static NSString* DefaultUserAgent = @"Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_3_3 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8J2 Safari/6533.18.5";
 static NSInteger DefaultTimeout = 10; 
 
 static NSString *GPHTTPRequestRunLoopMode = @"GPHTTPRequestRunLoopMode";
@@ -104,6 +105,11 @@ static NSString *GPHTTPRequestRunLoopMode = @"GPHTTPRequestRunLoopMode";
 
     if(self.allowCompression)
         [request setValue:@"gzip" forHTTPHeaderField:@"Accept-Encoding"];
+    
+    NSString* userA = self.userAgent;
+    if(!userA)
+        userA = DefaultUserAgent;
+    [request setValue:userA forHTTPHeaderField:@"User-Agent"];
     
     for(NSString* key in requestHeaders)
         [request setValue:[requestHeaders objectForKey:key] forHTTPHeaderField:key];
