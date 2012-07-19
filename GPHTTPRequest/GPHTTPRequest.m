@@ -332,11 +332,11 @@ static NSString *GPHTTPRequestRunLoopMode = @"GPHTTPRequestRunLoopMode";
 {
     if(cacheModel == GPHTTPIgnoreCache)
         return NO;
-    NSURLCache *sharedCache = [[NSURLCache alloc] initWithMemoryCapacity:0
+    /*NSURLCache *sharedCache = [[NSURLCache alloc] initWithMemoryCapacity:0
                                                             diskCapacity:0
                                                                 diskPath:nil];
     [NSURLCache setSharedURLCache:sharedCache];
-    [sharedCache release];
+    [sharedCache release];*/
 
     NSString* dataPath = [GPHTTPRequest cacheDirectory];
     NSString* checkPath = [dataPath stringByAppendingFormat:@"/%@",[GPHTTPRequest keyForURL:self.URL]];
