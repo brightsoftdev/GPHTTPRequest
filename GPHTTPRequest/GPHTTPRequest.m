@@ -509,7 +509,16 @@ static NSString *GPHTTPRequestRunLoopMode = @"GPHTTPRequestRunLoopMode";
     
     if(!postValues)
         postValues = [[NSMutableDictionary alloc] init];
-    [postValues setObject:value forKey:key];
+    if([value isKindOfClass:[NSString class]])
+        [postValues setObject:[self encodeString:value] forKey:key];
+    if([value isKindOfClass:[NSArray class]] || [value isKindOfClass:[NSDictionary class]])
+    {
+        for(id nestedString in value)
+            if([value isKindOfClass:[NSString class]])
+                value = [self encodeString:value];
+    }
+    else
+        [postValues setObject:value forKey:key];
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 -(void)setupPut:(NSMutableURLRequest*)request
@@ -595,16 +604,16 @@ static NSString *GPHTTPRequestRunLoopMode = @"GPHTTPRequestRunLoopMode";
         id value = [postValues objectForKey:key];
         if([value isKindOfClass:[NSArray class]])
         {
-            for(NSString* nestedString in value)
-                [comps addObject:[NSString stringWithFormat:@"%@[]=%@",key,[self encodeString:nestedString]]];
+            for(id nestedString in value)
+                [comps addObject:[NSString stringWithFormat:@"%@[]=%@",key,nestedString]];
         }
         else if([value isKindOfClass:[NSDictionary class]])
         {
-            for(NSString* nestedKey in value)
-                [comps addObject:[NSString stringWithFormat:@"%@[%@]=%@",key,nestedKey,[self encodeString:[value objectForKey:nestedKey]]]];
+            for(id nestedKey in value)
+                [comps addObject:[NSString stringWithFormat:@"%@[%@]=%@",key,nestedKey,[value objectForKey:nestedKey]]];
         }
         else
-            [comps addObject:[NSString stringWithFormat:@"%@=%@",key,[self encodeString:[postValues objectForKey:key]]]];
+            [comps addObject:[NSString stringWithFormat:@"%@=%@",key,[postValues objectForKey:key]]];
     }
     return [comps componentsJoinedByString:@"&"];
 }
@@ -616,21 +625,21 @@ static NSString *GPHTTPRequestRunLoopMode = @"GPHTTPRequestRunLoopMode";
     
     NSUInteger i=0;
     NSString *endItemBoundary = [NSString stringWithFormat:@"\r\n--%@\r\n",stringBoundary];
-    for(NSString* key in postValues)
+    for(id key in postValues)
     {
         id value = [postValues objectForKey:key];
         if([value isKindOfClass:[NSArray class]])
         {
-            for(NSString* nestedString in value)
-                postString = [postString stringByAppendingFormat:@"Content-Disposition: form-data; name=\"%@[]\"\r\n\r\n%@",key,[self encodeString:nestedString]];
+            for(id nestedString in value)
+                postString = [postString stringByAppendingFormat:@"Content-Disposition: form-data; name=\"%@[]\"\r\n\r\n%@",key,nestedString];
         }
         else if([value isKindOfClass:[NSDictionary class]])
         {
-            for(NSString* nestedKey in value)
-                postString = [postString stringByAppendingFormat:@"Content-Disposition: form-data; name=\"%@[%@]\"\r\n\r\n%@",key,nestedKey,[self encodeString:[value objectForKey:nestedKey]]];
+            for(id nestedKey in value)
+                postString = [postString stringByAppendingFormat:@"Content-Disposition: form-data; name=\"%@[%@]\"\r\n\r\n%@",key,nestedKey,[value objectForKey:nestedKey]];
         }
         else
-            postString = [postString stringByAppendingFormat:@"Content-Disposition: form-data; name=\"%@\"\r\n\r\n%@",key,[self encodeString:value]];
+            postString = [postString stringByAppendingFormat:@"Content-Disposition: form-data; name=\"%@\"\r\n\r\n%@",key,value];
         
         i++;
 		if (i != postValues.count || postFiles.count > 0) //Only add the boundary if this is not the last item in the post body
