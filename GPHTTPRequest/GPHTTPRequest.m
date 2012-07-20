@@ -106,14 +106,6 @@ static NSString *GPHTTPRequestRunLoopMode = @"GPHTTPRequestRunLoopMode";
     if(self.allowCompression)
         [request setValue:@"gzip" forHTTPHeaderField:@"Accept-Encoding"];
     
-    NSString* userA = self.userAgent;
-    if(!userA)
-        userA = DefaultUserAgent;
-    [request setValue:userA forHTTPHeaderField:@"User-Agent"];
-    
-    for(NSString* key in requestHeaders)
-        [request setValue:[requestHeaders objectForKey:key] forHTTPHeaderField:key];
-    
     if(requestType == GPHTTPRequestHEAD)
         [request setHTTPMethod:@"HEAD"];
     else if(requestType == GPHTTPRequestDELETE)
@@ -125,8 +117,23 @@ static NSString *GPHTTPRequestRunLoopMode = @"GPHTTPRequestRunLoopMode";
     }
     else if(requestType == GPHTTPRequestPUT)
     {
-        [request setHTTPMethod:@"PUT"];
+        //[request setHTTPMethod:@"PUT"];
+        [request setHTTPMethod:@"POST"];
         [self setupPut:request];
+    }
+    
+    NSString* userA = self.userAgent;
+    if(!userA)
+        userA = DefaultUserAgent;
+    [request setValue:userA forHTTPHeaderField:@"User-Agent"];
+    
+    for(NSString* key in requestHeaders)
+    {
+        NSString* check = [request valueForHTTPHeaderField:key];
+        if(!check)
+            [request addValue:[requestHeaders objectForKey:key] forHTTPHeaderField:key];
+        else
+            [request setValue:[requestHeaders objectForKey:key] forHTTPHeaderField:key];
     }
     
     [requestHeaders removeAllObjects];
@@ -513,10 +520,12 @@ static NSString *GPHTTPRequestRunLoopMode = @"GPHTTPRequestRunLoopMode";
 	CFRelease(uuid);
 	NSString *stringBoundary = [NSString stringWithFormat:@"0xKhTmLbOuNdArY-%@",uuidString];
     [self addRequestHeader:[NSString stringWithFormat:@"multipart/form-data; charset=%@; boundary=%@", charset, stringBoundary] key:@"Content-Type"];
+    //[self addRequestHeader:[NSString stringWithFormat:@"application/x-www-form-urlencoded; charset=%@",charset] key:@"Content-Type"];
+    [self addRequestHeader:@"Close" key:@"Connection"];
     
     NSString *endItemBoundary = [NSString stringWithFormat:@"\r\n--%@\r\n",stringBoundary];
     NSString* postString = [self putString:stringBoundary];
-    NSMutableData* putData = [NSMutableData data];
+    NSMutableData* putData = [[[NSMutableData alloc] init] autorelease];
     
     [putData appendData:[postString dataUsingEncoding:self.stringEncoding]];
 	NSInteger i = 0;
@@ -525,12 +534,16 @@ static NSString *GPHTTPRequestRunLoopMode = @"GPHTTPRequestRunLoopMode";
 		[putData appendData:[self stringAsData:[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"%@\"; filename=\"%@\"\r\n", [item objectForKey:@"key"], [item objectForKey:@"name"]]]];
 		[putData appendData:[self stringAsData:[NSString stringWithFormat:@"Content-Type: %@\r\n\r\n", [item objectForKey:@"type"]]]];
         [putData appendData:[item objectForKey:@"data"]];
+        //[putData appendData:[self stringAsData:[NSString stringWithFormat:@"%d",[[item objectForKey:@"data"] length] ]]];
 		i++;
 		if (i != postFiles.count)// Only add the boundary if this is not the last item in the post body
 			[putData appendData:[self stringAsData:endItemBoundary]];
 	}
 	
 	[putData appendData:[self stringAsData:[NSString stringWithFormat:@"\r\n--%@--\r\n",stringBoundary]]];
+    [self addRequestHeader:[NSString stringWithFormat:@"%d", [putData length]] key:@"Content-Length"];
+    //NSString* string = [[NSString alloc] initWithData:putData encoding:self.stringEncoding];
+    //NSLog(@"test:\n%@",string);
     [request setHTTPBody:putData];
 }
                  
@@ -541,9 +554,11 @@ static NSString *GPHTTPRequestRunLoopMode = @"GPHTTPRequestRunLoopMode";
     requestType = GPHTTPRequestPUT;
     if(!postFiles)
         postFiles = [[NSMutableArray alloc] init];
+    if(!mimeType)
+        mimeType = @"application/octet-stream";
     NSMutableDictionary* dic = [NSMutableDictionary dictionary];
     [dic setObject:name forKey:@"name"];
-    [dic setObject:data forKey:@"data"];
+    [dic setObject:data  forKey:@"data"];
     [dic setObject:mimeType forKey:@"type"];
     [dic setObject:key forKey:@"key"];
     [postFiles addObject:dic];
