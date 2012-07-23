@@ -288,6 +288,7 @@ static NSString *GPHTTPRequestRunLoopMode = @"GPHTTPRequestRunLoopMode";
     #endif
     [currentConnection release];
     currentConnection = nil;
+    connection = nil;
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 - (void)connection:(NSURLConnection *)currentConnection didFailWithError:(NSError *)error
@@ -305,6 +306,7 @@ static NSString *GPHTTPRequestRunLoopMode = @"GPHTTPRequestRunLoopMode";
     #endif
     [currentConnection release];
     currentConnection = nil;
+    connection = nil;
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 - (NSURLRequest*)connection:(NSURLConnection *)inConnection willSendRequest:(NSURLRequest*)inRequest redirectResponse:(NSURLResponse *)inRedirectResponse
@@ -722,6 +724,7 @@ static NSString *GPHTTPRequestRunLoopMode = @"GPHTTPRequestRunLoopMode";
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 -(void)dealloc
 {
+    connection = nil;
     self.URL = nil;
     self.delegate = nil;
     [connectionError release];

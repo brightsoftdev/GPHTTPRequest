@@ -175,7 +175,7 @@ void error( void * ctx, const char * msg, ... )
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //objective c function from c functions above
 ///////////////////////////////////////////////////////////////////////////////////////////////////
--(void)didStartElement:(NSString*)tag attributes:(NSDictionary*)attributeDict
+-(void)startElement:(NSString*)tag attributes:(NSDictionary*)attributeDict
 {
     //NSLog(@"tag did start name: %@",tag);
     if([tag isEqualToString:@"meta"] || [tag isEqualToString:@"link"] ||  [tag isEqualToString:@"img"])
@@ -220,20 +220,20 @@ void error( void * ctx, const char * msg, ... )
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
--(void)foundCharacters:(NSString*)string
+-(void)foundChars:(NSString*)string
 {
     //NSLog(@"string: Text: %@",string);
     if(string)
         HTMLContent = [HTMLContent stringByAppendingFormat:@"%@",string];
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
--(void)didEndElement:(NSString*)tag
+-(void)endElement:(NSString*)tag
 {
     //NSLog(@"tag did end name: %@",tag);
     HTMLContent = [HTMLContent stringByAppendingFormat:@"</%@>",tag];
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
--(void)documentDidEnd
+-(void)documentEnd
 {
     NSURL *fileName = [GPHTTPWebPage pathForSite:self.URL.absoluteString];
     //NSURL* url = [NSURL fileURLWithPath:fileName];
