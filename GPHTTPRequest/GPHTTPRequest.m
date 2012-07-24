@@ -504,8 +504,11 @@ static NSString *GPHTTPRequestRunLoopMode = @"GPHTTPRequestRunLoopMode";
     [request setHTTPBody:[[self postString] dataUsingEncoding:self.stringEncoding]];
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
--(void)addPostValue:(id)value key:(NSString*)key
+-(void)addPostValue:(id)val key:(NSString*)key
 {
+    id value = val;
+    if(!value)
+        value= @"";
     if(requestType != GPHTTPRequestPUT)
         requestType = GPHTTPRequestPOST;
     
