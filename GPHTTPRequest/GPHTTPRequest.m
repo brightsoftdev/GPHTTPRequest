@@ -117,8 +117,8 @@ static NSString *GPHTTPRequestRunLoopMode = @"GPHTTPRequestRunLoopMode";
     }
     else if(requestType == GPHTTPRequestPUT)
     {
-        //[request setHTTPMethod:@"PUT"];
-        [request setHTTPMethod:@"POST"];
+        [request setHTTPMethod:@"PUT"];
+        //[request setHTTPMethod:@"POST"];
         [self setupPut:request];
     }
     
