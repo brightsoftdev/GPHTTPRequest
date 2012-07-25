@@ -9,6 +9,15 @@
 #import "GPHTTPWebPage.h"
 #import <libxml2/libxml/HTMLparser.h>
 
+@interface GPHTTPWebPage()
+
+-(void)didStartElement:(NSString*)tag attributes:(NSDictionary*)attributeDict;
+-(void)didEndElement:(NSString*)tag;
+-(void)foundCharacters:(NSString*)string;
+-(void)documentDidEnd;
+
+@end
+
 @implementation GPHTTPWebPage
 
 @synthesize delegate = delegate;
@@ -139,14 +148,14 @@ void elementDidStart(void *ctx,const xmlChar *name,const xmlChar **atts)
     
     NSString* tag = [elementName lowercaseString];
     //NSLog(@"collect: %@",collect);
-    HTMLParser* parser = (HTMLParser*)ctx;
+    GPHTTPWebPage* parser = (GPHTTPWebPage*)ctx;
     [parser didStartElement:tag attributes:collect];
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 void foundChars(void *ctx,const xmlChar *ch,int len)
 {
     NSString* string = [NSString stringWithCString:(const char*)ch encoding:NSUTF8StringEncoding];
-    HTMLParser* parser = (HTMLParser*)ctx;
+    GPHTTPWebPage* parser = (GPHTTPWebPage*)ctx;
     [parser foundCharacters:string];
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -154,13 +163,13 @@ void elementDidEnd(void *ctx,const xmlChar *name)
 {
     NSString* elementName = [NSString stringWithCString:(const char*)name encoding:NSUTF8StringEncoding];
     NSString* tag = [elementName lowercaseString];
-    HTMLParser* parser = (HTMLParser*)ctx;
+    GPHTTPWebPage* parser = (GPHTTPWebPage*)ctx;
     [parser didEndElement:tag];
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 void documentDidEnd(void *ctx)
 {
-    HTMLParser* parser = (HTMLParser*)ctx;
+    GPHTTPWebPage* parser = (GPHTTPWebPage*)ctx;
     [parser documentDidEnd];
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -175,7 +184,7 @@ void error( void * ctx, const char * msg, ... )
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //objective c function from c functions above
 ///////////////////////////////////////////////////////////////////////////////////////////////////
--(void)startElement:(NSString*)tag attributes:(NSDictionary*)attributeDict
+-(void)didStartElement:(NSString*)tag attributes:(NSDictionary*)attributeDict
 {
     //NSLog(@"tag did start name: %@",tag);
     if([tag isEqualToString:@"meta"] || [tag isEqualToString:@"link"] ||  [tag isEqualToString:@"img"])
@@ -220,20 +229,20 @@ void error( void * ctx, const char * msg, ... )
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
--(void)foundChars:(NSString*)string
+-(void)foundCharacters:(NSString*)string
 {
     //NSLog(@"string: Text: %@",string);
     if(string)
         HTMLContent = [HTMLContent stringByAppendingFormat:@"%@",string];
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
--(void)endElement:(NSString*)tag
+-(void)didEndElement:(NSString*)tag
 {
     //NSLog(@"tag did end name: %@",tag);
     HTMLContent = [HTMLContent stringByAppendingFormat:@"</%@>",tag];
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
--(void)documentEnd
+-(void)documentDidEnd
 {
     NSURL *fileName = [GPHTTPWebPage pathForSite:self.URL.absoluteString];
     //NSURL* url = [NSURL fileURLWithPath:fileName];
