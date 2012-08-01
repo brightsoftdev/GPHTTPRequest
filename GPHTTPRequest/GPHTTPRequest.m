@@ -94,8 +94,6 @@ static NSString *GPHTTPRequestRunLoopMode = @"GPHTTPRequestRunLoopMode";
     
     if([self checkCache])
     {
-        isFinished = YES;
-        [self finish];
         return nil;
     }
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:self.URL
@@ -246,7 +244,7 @@ static NSString *GPHTTPRequestRunLoopMode = @"GPHTTPRequestRunLoopMode";
                 NSRange end = [cache rangeOfString:@","];
                 if(end.location == NSNotFound)
                     end.location = cache.length;
-                int start = range.location + range.length;
+                unsigned long start = range.location + range.length;
                 age = [[cache substringWithRange:NSMakeRange(start, end.location-start)] intValue];
             }
             expiresDate = [[NSDate dateWithTimeIntervalSinceNow:age] retain];
@@ -309,7 +307,7 @@ static NSString *GPHTTPRequestRunLoopMode = @"GPHTTPRequestRunLoopMode";
     connection = nil;
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-- (NSURLRequest*)connection:(NSURLConnection *)inConnection willSendRequest:(NSURLRequest*)inRequest redirectResponse:(NSURLResponse *)inRedirectResponse
+/*- (NSURLRequest*)connection:(NSURLConnection *)inConnection willSendRequest:(NSURLRequest*)inRequest redirectResponse:(NSURLResponse *)inRedirectResponse
 {
     if (inRedirectResponse) 
     {
@@ -319,7 +317,7 @@ static NSString *GPHTTPRequestRunLoopMode = @"GPHTTPRequestRunLoopMode";
     } 
     else 
         return inRequest;
-}
+}*/
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 - (NSCachedURLResponse *) connection:(NSURLConnection *)connection willCacheResponse:(NSCachedURLResponse *)cachedResponse
 {
@@ -328,6 +326,14 @@ static NSString *GPHTTPRequestRunLoopMode = @"GPHTTPRequestRunLoopMode";
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //caching functions
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//get data from cache
++(NSData*)cacheData:(NSURL*)url
+{
+    NSString* dataPath = [GPHTTPRequest cacheDirectory];
+    NSString* checkPath = [dataPath stringByAppendingFormat:@"/%@",[GPHTTPRequest keyForURL:url]];
+    return [NSData dataWithContentsOfFile:checkPath];
+}
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //returns if request was loaded from cache
 -(BOOL)didLoadFromCache
@@ -411,6 +417,7 @@ static NSString *GPHTTPRequestRunLoopMode = @"GPHTTPRequestRunLoopMode";
 //complete request with cache
 -(void)finishWithCache:(NSString*)path
 {
+    statusCode = 200;
     didUseCache = YES;
     isFinished = YES;
     [receivedData setLength:0];
