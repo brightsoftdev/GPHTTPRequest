@@ -411,6 +411,7 @@ static NSString *GPHTTPRequestRunLoopMode = @"GPHTTPRequestRunLoopMode";
 //complete request with cache
 -(void)finishWithCache:(NSString*)path
 {
+    statusCode = 200;
     didUseCache = YES;
     isFinished = YES;
     [receivedData setLength:0];
