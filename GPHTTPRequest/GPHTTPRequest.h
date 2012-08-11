@@ -72,6 +72,7 @@ typedef void (^GPHTTPBlock)(void);
     BOOL trackProgress;
     unsigned long long contentLength;
     unsigned long long progessLength;
+    BOOL allowSelfSigned;
     #if NS_BLOCKS_AVAILABLE
     GPHTTPBlock completionBlock;
     GPHTTPBlock failureBlock;
@@ -96,6 +97,7 @@ typedef void (^GPHTTPBlock)(void);
 @property(nonatomic,assign)GPHTTPRequestCache cacheModel;
 @property(nonatomic,assign)NSInteger cacheTimeout;
 @property(nonatomic,assign)BOOL trackProgress;
+@property(nonatomic,assign)BOOL allowSelfSigned;
 #if TARGET_OS_IPHONE && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_4_0
 @property(nonatomic,assign)BOOL continueInBackground;
 #endif
